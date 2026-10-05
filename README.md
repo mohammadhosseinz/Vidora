@@ -8,7 +8,7 @@ A local-first desktop video downloader built with Flutter, yt-dlp, FFmpeg and De
 
 ## About us
 
-**Author: Zolfaghari (ذوالفقاری).** Vidora aims to make local video downloads simple while respecting your privacy. English is the default interface language; Persian, Arabic and Chinese are available from the language selector.
+**Author: Zolfaghari.** Vidora aims to make local video downloads simple while respecting your privacy. English is the default interface language; Persian, Arabic and Chinese are available from the language selector.
 
 **Please support us!** Your support helps us keep developing Vidora, fix bugs and release updates. All features remain free and support is optional. Open **About Vidora** or the heart button in the app to view the support options.
 
