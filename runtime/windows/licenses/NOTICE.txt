@@ -1,0 +1,21 @@
+Local Video is a local prototype. Engines run as separate executables.
+
+yt-dlp 2026.08.19: official PyInstaller standalone binary, Python and EJS included.
+https://github.com/yt-dlp/yt-dlp/releases/tag/2026.08.19
+See yt-dlp-LICENSE and yt-dlp-THIRD_PARTY_LICENSES.txt.
+
+Deno 2.9.7: MIT licensed; see deno-LICENSE.md.
+https://github.com/denoland/deno/releases/tag/v2.9.7
+
+FFmpeg/FFprobe 7.1 essentials: GPLv3 static binaries, unmodified, from the
+pre-existing Chocolatey installation of Gyan's build on the build machine.
+See FFmpeg-GPL.txt and FFmpeg-build-readme.txt (configuration and libraries).
+Exact FFmpeg source: https://github.com/FFmpeg/FFmpeg/commit/b08d7969c5
+Build provider: https://www.gyan.dev/ffmpeg/builds/
+Build tooling: https://github.com/GyanD/codexffmpeg
+This prototype is for local evaluation. Before redistributing a public release,
+provide the complete corresponding source for this exact FFmpeg build and its
+linked dependencies, including build instructions, according to GPLv3.
+
+Noto Sans Arabic and Noto Sans SC: SIL Open Font License 1.1.
+Font license files are included alongside the app's bundled fonts.

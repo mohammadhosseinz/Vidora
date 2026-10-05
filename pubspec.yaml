@@ -1,0 +1,29 @@
+name: local_video
+description: Vidora local desktop video downloader
+publish_to: none
+version: 0.1.6+7
+environment:
+  sdk: '>=3.10.0 <4.0.0'
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  file_selector: ^1.1.0
+  path: ^1.9.1
+  window_manager: ^0.5.1
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/brand/vidora-logo.png
+    - assets/support.json
+  fonts:
+    - family: NotoArabic
+      fonts:
+        - asset: assets/fonts/NotoSansArabic.ttf
+    - family: NotoChinese
+      fonts:
+        - asset: assets/fonts/NotoSansSC.ttf

@@ -1,0 +1,15 @@
+{
+  "donationUrl": "",
+  "wallets": [
+    {
+      "currency": "USDT",
+      "network": "BSC / BEP20",
+      "address": "0x9a350193884756c2ff75e58847d8eff5441c27bf"
+    },
+    {
+      "currency": "TRX",
+      "network": "TRON (TRX only)",
+      "address": "TBiSUJuPZfLAJ9VHiQuGpNVPzsEYixgp13"
+    }
+  ]
+}
