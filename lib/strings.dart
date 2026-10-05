@@ -1,5 +1,24 @@
-const languages = {'fa': 'فارسی', 'ar': 'العربية', 'en': 'English', 'zh': '中文'};
+const languages = {'en': 'English', 'fa': 'فارسی', 'ar': 'العربية', 'zh': '中文'};
 const words = <String, List<String>>{
+  'about': ['دربارهٔ ویدورا', 'حول فيدورا', 'About Vidora', '关于 Vidora'],
+  'aboutBody': [
+    'ویدورا یک دانلودر رایگان و محلی ویدیو است. بررسی لینک، دانلود و پردازش فایل روی دستگاه شما انجام می‌شود. هدف ما تجربه‌ای ساده و احترام به حریم خصوصی شماست.',
+    'فيدورا تطبيق مجاني ومحلي لتنزيل الفيديو. يجري فحص الروابط والتنزيل ومعالجة الملفات على جهازك. هدفنا تجربة بسيطة تحترم خصوصيتك.',
+    'Vidora is a free local video downloader. Link inspection, downloads and file processing take place on your device. We aim for a simple experience that respects your privacy.',
+    'Vidora 是一款免费的本地视频下载应用。链接检查、下载和文件处理均在您的设备上完成。我们致力于提供简单易用、尊重隐私的体验。',
+  ],
+  'aboutAuthor': [
+    'نویسندهٔ برنامه: ذوالفقاری',
+    'مؤلف التطبيق: ذوالفقاری',
+    'Author: Zolfaghari (ذوالفقاری)',
+    '作者：Zolfaghari（ذوالفقاری）',
+  ],
+  'aboutSupport': [
+    'از ما حمایت کنید! حمایت شما به ادامهٔ توسعه، رفع اشکال‌ها و انتشار به‌روزرسانی‌های ویدورا کمک می‌کند. حمایت کاملاً اختیاری است و امکانات برنامه رایگان می‌مانند.',
+    'ادعمونا! يساعد دعمكم على تطوير فيدورا وإصلاح الأخطاء وإصدار التحديثات. الدعم اختياري تماماً وتبقى ميزات التطبيق مجانية.',
+    'Please support us! Your support helps us continue developing Vidora, fix bugs and release updates. Support is entirely optional and all features remain free.',
+    '请支持我们！您的支持将帮助我们继续开发 Vidora、修复问题并发布更新。支持完全自愿，所有功能仍然免费。',
+  ],
   'unknownSize': ['حجم نامشخص', 'الحجم غير معروف', 'Size unknown', '大小未知'],
   'approximately': ['حدود ', 'حوالي ', 'About ', '约 '],
   'noPreview': [

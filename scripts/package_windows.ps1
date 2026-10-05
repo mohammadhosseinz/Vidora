@@ -9,6 +9,7 @@ try {
   foreach ($name in @('yt-dlp','ffmpeg','ffprobe','deno')) {
     if (!(Test-Path "runtime/windows/$name.exe")) { throw "Missing bundled $name" }
   }
+  Copy-Item LICENSE,THIRD_PARTY_NOTICES.md,README*.md $bundle -Force
   New-Item -ItemType Directory -Force "$bundle/tools" | Out-Null
   Copy-Item assets/support.json "$bundle/support.json" -Force
   Copy-Item runtime/windows/* "$bundle/tools" -Recurse -Force
@@ -18,7 +19,7 @@ try {
     Copy-Item (Join-Path $env:WINDIR "System32/$dll") $bundle -Force
   }
   New-Item -ItemType Directory -Force dist | Out-Null
-  Compress-Archive -Path "$bundle/*" -DestinationPath dist/Vidora-Windows-x64-0.1.6.zip -Force
+  Compress-Archive -Path "$bundle/*" -DestinationPath dist/Vidora-Windows-x64-0.1.7.zip -Force
   & $Iscc packaging/windows.iss
   if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
 } finally { Pop-Location }

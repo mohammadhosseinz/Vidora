@@ -1,10 +1,16 @@
 # Vidora — ویدورا
 
-![Vidora logo](assets/brand/vidora-logo.png)
+<img src="assets/brand/vidora-logo.png" width="144" alt="Vidora logo">
 
 A local-first desktop video downloader built with Flutter, yt-dlp, FFmpeg and Deno. The interface supports **Persian, Arabic, English and Chinese**, including RTL layouts for Persian and Arabic.
 
-[راهنمای فارسی](README.fa.md) · [Build and packaging](docs/BUILD.md) · [Cookies](docs/COOKIES.fa.md) · [Support](docs/SUPPORT.md)
+[English](README.md) · [فارسی](README.fa.md) · [العربية](README.ar.md) · [中文](README.zh.md) · [Build and packaging](docs/BUILD.md) · [Cookies](docs/COOKIES.fa.md) · [Support](docs/SUPPORT.md)
+
+## About us
+
+**Author: Zolfaghari (ذوالفقاری).** Vidora aims to make local video downloads simple while respecting your privacy. English is the default interface language; Persian, Arabic and Chinese are available from the language selector.
+
+**Please support us!** Your support helps us keep developing Vidora, fix bugs and release updates. All features remain free and support is optional. Open **About Vidora** or the heart button in the app to view the support options.
 
 ## What works
 
@@ -19,7 +25,7 @@ There is **no Vidora backend, cloud storage or app account**. The app contacts t
 
 ## Status
 
-Version **0.1.6**. Windows x64 release builds and automated tests have been run locally. macOS and Linux source runners and packaging scripts are included, but their native release builds have not been tested on this Windows machine. Android is not implemented yet; `DownloadEngine` provides the engine boundary for a future mobile adapter.
+Version **0.1.7**. Windows x64 release builds and automated tests have been run locally. macOS and Linux source runners and packaging scripts are included, but their native release builds have not been tested on this Windows machine. Android is not implemented yet; `DownloadEngine` provides the engine boundary for a future mobile adapter.
 
 Site support is best effort. Login restrictions, anti-bot checks, DRM, geography, expired links and site changes may prevent a download. Successful YouTube downloads reported by the project owner do not guarantee every YouTube link will work.
 

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.7
+- Default to English while retaining Persian, Arabic and Chinese, including RTL.
+- Add a translated About dialog naming author Zolfaghari (ذوالفقاری), with an optional support invitation and direct support action.
+- Add Arabic and Chinese README files and language navigation across all four READMEs.
+
 ## 0.1.6
 - Move the full project into the Vidora Git checkout with build/privacy/support documentation.
 - Add independent USDT/BSC and TRX/TRON support cards and copy buttons.

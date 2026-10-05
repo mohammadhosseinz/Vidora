@@ -14,7 +14,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
-  await windowManager.setTitle('Vidora · ویدورا');
+  await windowManager.setTitle('Vidora');
   runApp(const LocalVideoApp());
 }
 
@@ -25,7 +25,7 @@ class LocalVideoApp extends StatefulWidget {
 }
 
 class _AppState extends State<LocalVideoApp> {
-  String language = 'fa';
+  String language = 'en';
   @override
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -242,6 +242,53 @@ class _HomeState extends State<Home> with WindowListener {
     await engine.cancel(j.id);
   }
 
+  Future<void> showAbout() async {
+    final supportRequested = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(t('about')),
+        scrollable: true,
+        content: SizedBox(
+          width: 420,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Image.asset(
+                  'assets/brand/vidora-logo.png',
+                  width: 88,
+                  height: 88,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(t('aboutBody')),
+              const SizedBox(height: 16),
+              Text(
+                t('aboutAuthor'),
+                style: Theme.of(context).textTheme.titleMedium,
+              ),
+              const SizedBox(height: 12),
+              Text(t('aboutSupport')),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: Text(t('close')),
+          ),
+          FilledButton.icon(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            icon: const Icon(Icons.favorite_outline),
+            label: Text(t('support')),
+          ),
+        ],
+      ),
+    );
+    if (supportRequested == true && mounted) await showSupport();
+  }
+
   Future<void> showSupport() async {
     bool launchFailed = false;
     await showDialog<void>(
@@ -358,6 +405,11 @@ class _HomeState extends State<Home> with WindowListener {
           ],
         ),
         actions: [
+          IconButton(
+            onPressed: showAbout,
+            tooltip: t('about'),
+            icon: const Icon(Icons.info_outline),
+          ),
           IconButton(
             onPressed: showSupport,
             tooltip: t('support'),

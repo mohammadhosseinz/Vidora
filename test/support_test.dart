@@ -122,10 +122,10 @@ void main() {
         );
       });
       await tester.pumpAndSettle();
-      expect(find.text('ویدورا'), findsOneWidget);
-      await tester.tap(find.byTooltip('حمایت از ویدورا'));
+      expect(find.text('Vidora'), findsOneWidget);
+      await tester.tap(find.byTooltip('Support Vidora'));
       await tester.pumpAndSettle();
-      expect(find.text('لینک حمایت به‌زودی اضافه می‌شود.'), findsNothing);
+      expect(find.text('A support link will be added soon.'), findsNothing);
       expect(find.text('USDT · BSC / BEP20'), findsOneWidget);
       expect(find.text('TRX · TRON (TRX only)'), findsOneWidget);
       const address = '0x9a350193884756c2ff75e58847d8eff5441c27bf';
@@ -148,7 +148,10 @@ void main() {
               .first;
           final copy = find.descendant(
             of: card,
-            matching: find.widgetWithText(OutlinedButton, 'کپی آدرس کیف پول'),
+            matching: find.widgetWithText(
+              OutlinedButton,
+              'Copy wallet address',
+            ),
           );
           await tester.ensureVisible(copy);
           await tester.tap(copy);
@@ -160,11 +163,11 @@ void main() {
       }
 
       final button = tester.widget<FilledButton>(
-        find.widgetWithText(FilledButton, 'رفتن به صفحهٔ حمایت'),
+        find.widgetWithText(FilledButton, 'Open support page'),
       );
       expect(button.onPressed, isNull);
       expect(tester.takeException(), isNull);
-      await tester.tap(find.text('بستن'));
+      await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();
     },
   );
