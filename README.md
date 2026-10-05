@@ -10,8 +10,6 @@ A local-first desktop video downloader built with Flutter, yt-dlp, FFmpeg and De
 
 **Author: Zolfaghari.** Vidora aims to make local video downloads simple while respecting your privacy. English is the default interface language; Persian, Arabic and Chinese are available from the language selector.
 
-**Please support us!** Your support helps us keep developing Vidora, fix bugs and release updates. All features remain free and support is optional. Open **About Vidora** or the heart button in the app to view the support options.
-
 ## What works
 
 - Paste a link to inspect its title, thumbnail and available video formats.
@@ -65,14 +63,9 @@ dist/         Local installers/portable builds (not committed)
 
 ## Support development
 
-Vidora is free; support is optional. The app and `assets/support.json` contain separate public receiving details:
+If you find Vidora useful, consider supporting its development, bug fixes and updates. Support is optional and all features remain free.
 
-| Currency | Network | Address |
-| --- | --- | --- |
-| USDT | BSC / BEP20 | `0x9a350193884756c2ff75e58847d8eff5441c27bf` |
-| TRX | TRON — TRX only | `TBiSUJuPZfLAJ9VHiQuGpNVPzsEYixgp13` |
-
-Use only the currency/network shown for that row. These are owner-provided exchange deposit addresses. Actual receipt, ownership, address lifetime, minimum deposit and exchange availability have not been verified by the developer. See [support details](docs/SUPPORT.md). This app does not connect a wallet, create transactions or verify payments.
+[Support Vidora — addresses and QR codes](docs/SUPPORT.md). You can also open this page from the app’s heart button.
 
 ## License and distribution
 

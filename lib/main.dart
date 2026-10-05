@@ -523,6 +523,15 @@ class _HomeState extends State<Home> with WindowListener {
                         ),
                     ],
                   ),
+                  ExpansionTile(
+                    title: Text(t('cookiesGuideTitle')),
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+                        child: Text(t('cookiesGuide')),
+                      ),
+                    ],
+                  ),
                 ],
               ),
               const SizedBox(height: 12),

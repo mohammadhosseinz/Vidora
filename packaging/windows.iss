@@ -1,14 +1,14 @@
 [Setup]
 AppId={{F3725135-4137-493D-82EC-A450B722EFB6}
 AppName=Vidora
-AppVersion=0.1.7
+AppVersion=0.1.8
 DefaultDirName={localappdata}\Programs\Vidora
 DefaultGroupName=Vidora
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist
-OutputBaseFilename=Vidora-Setup-Windows-x64-0.1.7
+OutputBaseFilename=Vidora-Setup-Windows-x64-0.1.8
 Compression=lzma2
 SolidCompression=yes
 UninstallDisplayIcon={app}\local_video.exe

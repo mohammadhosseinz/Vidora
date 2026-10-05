@@ -1,8 +1,14 @@
 # Changelog
 
+## 0.1.8
+- Replace the cookie help's chat-specific warning with an expandable, translated guide for exporting Netscape cookies using Get cookies.txt LOCALLY.
+- Add a public support page with network-specific address QR codes and a custom GitHub Sponsor link.
+- Connect the app's support button to the public page and simplify support text across languages.
+- Use Zolfaghari in non-Persian author credits.
+
 ## 0.1.7
 - Default to English while retaining Persian, Arabic and Chinese, including RTL.
-- Add a translated About dialog naming author Zolfaghari (ذوالفقاری), with an optional support invitation and direct support action.
+- Add a translated About dialog naming author Zolfaghari, with an optional support invitation and direct support action.
 - Add Arabic and Chinese README files and language navigation across all four READMEs.
 
 ## 0.1.6

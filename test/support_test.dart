@@ -165,7 +165,7 @@ void main() {
       final button = tester.widget<FilledButton>(
         find.widgetWithText(FilledButton, 'Open support page'),
       );
-      expect(button.onPressed, isNull);
+      expect(button.onPressed, isNotNull);
       expect(tester.takeException(), isNull);
       await tester.tap(find.text('Close'));
       await tester.pumpAndSettle();

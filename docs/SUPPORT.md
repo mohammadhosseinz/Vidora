@@ -1,16 +1,57 @@
 # Support Vidora
 
-Support is optional; application features remain free. The dialog contains independent cards and copy buttons for these owner-provided receiving addresses:
+[English](#english) · [فارسی](#فارسی) · [العربية](#العربية) · [中文](#中文)
 
-| Currency | Network | Public address |
-| --- | --- | --- |
-| USDT | BSC / BEP20 only | `0x9a350193884756c2ff75e58847d8eff5441c27bf` |
-| TRX | TRON — TRX only | `TBiSUJuPZfLAJ9VHiQuGpNVPzsEYixgp13` |
+<img src="../assets/brand/vidora-logo.png" width="96" alt="Vidora logo">
 
-Do not send USDT to the TRX address or use Ethereum/TRON for the BSC address. Exchange screenshots also warn against smart-contract deposits for the USDT receiving page. Verify minimum deposit, address validity and deposit availability with the receiving exchange. No real donation/ownership verification has been performed by the developer.
+## English
 
-`assets/support.json` stores public configuration. Set `donationUrl` to an actual HTTPS donation page if you create one. The `wallets` list uses `currency`, `network`, `address`; never add recovery phrases, passwords, API keys or private keys.
+Vidora is developed by **Zolfaghari**. If you find it useful, consider supporting continued development, bug fixes and updates. Support is optional and all features remain free.
 
-Windows/Linux read an optional `support.json` next to the executable; restart after editing. macOS uses the bundled asset to preserve the app signature, so configure it before building/signing. The installer preserves an existing external configuration. Empty 0.1.4 settings and the stock USDT-only 0.1.5 settings migrate to the new bundled defaults; explicit custom lists remain unchanged. `{"disabled":true}` disables support.
+Copy an address below or scan its QR code. **QR codes contain the address only; they do not select a currency or network.** Check the currency, network and address in your wallet before confirming.
 
-The app only displays/copies an address or opens a public page. It never connects a wallet, sends funds, signs transactions or verifies payments. Memo/tag-based deposit destinations are not supported by the current wallet cards.
+### USDT — BSC / BEP20 only
+
+```text
+0x9a350193884756c2ff75e58847d8eff5441c27bf
+```
+
+<img src="../assets/support/usdt-bsc.png" width="200" alt="USDT receiving address QR code — BSC / BEP20 only">
+
+### TRX — TRON only
+
+```text
+TBiSUJuPZfLAJ9VHiQuGpNVPzsEYixgp13
+```
+
+<img src="../assets/support/trx-tron.png" width="200" alt="TRX receiving address QR code — TRON, TRX only">
+
+Use only the currency and network listed for each address. Do not send USDT to the TRX address or use Ethereum or TRON for the USDT address. These are exchange deposit addresses provided by the project owner. Before sending, confirm deposit availability, minimum amounts and supported transfer methods with the maintainer; receipt has not been independently verified. You can [open an issue](https://github.com/mohammadhosseinz/Vidora/issues/new) to ask about these public details.
+
+Payments are made through your own wallet or exchange, outside GitHub Sponsors. This page does not connect a wallet or process payments. Thank you for supporting Vidora.
+
+## فارسی
+
+ویدورا توسط **ذوالفقاری** توسعه داده می‌شود. اگر برنامه برایتان مفید بوده، می‌توانید از ادامهٔ توسعه، رفع اشکال‌ها و انتشار به‌روزرسانی‌ها حمایت کنید. حمایت کاملاً اختیاری است و همهٔ امکانات رایگان می‌مانند.
+
+آدرس‌ها و QRها در بالای صفحه آمده‌اند: **USDT فقط روی BSC / BEP20** و **TRX فقط روی TRON**. QR فقط آدرس را دارد؛ ارز یا شبکه را انتخاب نمی‌کند. پیش از تأیید، ارز، شبکه و آدرس را بررسی کنید. به آدرس TRX تتر نفرستید و برای آدرس USDT از Ethereum یا TRON استفاده نکنید.
+
+این‌ها آدرس‌های واریز صرافی هستند که صاحب پروژه ارائه کرده است. پیش از ارسال، فعال‌بودن واریز، حداقل مبلغ و روش انتقال مجاز را از نگهدارندهٔ پروژه بپرسید؛ دریافت وجه مستقلاً بررسی نشده است. برای پرسیدن این اطلاعات عمومی می‌توانید [Issue باز کنید](https://github.com/mohammadhosseinz/Vidora/issues/new).
+
+پرداخت از کیف پول یا صرافی خودتان و خارج از GitHub Sponsors انجام می‌شود. این صفحه کیف پول را متصل نمی‌کند و پرداختی انجام نمی‌دهد. از حمایت شما سپاسگزاریم.
+
+## العربية
+
+يطوّر **Zolfaghari** تطبيق Vidora. إذا أفادك، يمكنك دعم تطويره وإصلاح الأخطاء وإصدار التحديثات. الدعم اختياري وجميع الميزات مجانية.
+
+العناوين ورموز QR أعلاه مخصصة لـ **USDT على BSC / BEP20 فقط** و**TRX على TRON فقط**. يحتوي QR على العنوان فقط؛ اختر العملة والشبكة الصحيحتين بنفسك. لا ترسل USDT إلى عنوان TRX ولا تستخدم Ethereum أو TRON لعنوان USDT.
+
+هذه عناوين إيداع لدى منصة تداول قدمها صاحب المشروع. اسأل مسؤول المشروع عن توفر الإيداع والحد الأدنى وطرق التحويل المقبولة قبل الإرسال؛ لم يُتحقق مستقلاً من استلام الأموال. يمكنك [فتح Issue](https://github.com/mohammadhosseinz/Vidora/issues/new) للاستفسار عن هذه المعلومات العامة. يجري الدفع من محفظتك أو منصتك خارج GitHub Sponsors؛ هذه الصفحة لا تربط محفظة ولا تعالج المدفوعات. شكراً لدعمك.
+
+## 中文
+
+Vidora 由 **Zolfaghari** 开发。如果应用对您有帮助，欢迎支持后续开发、问题修复和更新。支持完全自愿，所有功能仍然免费。
+
+上方地址和二维码分别用于 **BSC / BEP20 上的 USDT** 和 **TRON 上的 TRX**。二维码仅包含地址，不会选择币种或网络。请在确认前检查币种、网络和地址。请勿向 TRX 地址发送 USDT，也不要通过 Ethereum 或 TRON 向 USDT 地址转账。
+
+这些地址是项目所有者提供的交易所充值地址。发送前，请向维护者确认充值是否开放、最低金额和允许的转账方式；到账情况尚未经过独立验证。您可以[提交 Issue](https://github.com/mohammadhosseinz/Vidora/issues/new)询问这些公开信息。付款通过您自己的钱包或交易所完成，不经过 GitHub Sponsors。本页面不会连接钱包或处理付款。感谢您的支持。

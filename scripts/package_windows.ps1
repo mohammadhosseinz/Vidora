@@ -19,7 +19,7 @@ try {
     Copy-Item (Join-Path $env:WINDIR "System32/$dll") $bundle -Force
   }
   New-Item -ItemType Directory -Force dist | Out-Null
-  Compress-Archive -Path "$bundle/*" -DestinationPath dist/Vidora-Windows-x64-0.1.7.zip -Force
+  Compress-Archive -Path "$bundle/*" -DestinationPath dist/Vidora-Windows-x64-0.1.8.zip -Force
   & $Iscc packaging/windows.iss
   if ($LASTEXITCODE -ne 0) { throw 'Installer compilation failed' }
 } finally { Pop-Location }

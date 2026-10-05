@@ -14,7 +14,7 @@ flutter run -d windows
 ./scripts/package_windows.ps1 -Iscc C:/path/to/ISCC.exe
 ```
 
-Output: `dist/Vidora-Setup-Windows-x64-0.1.7.exe` and `dist/Vidora-Windows-x64-0.1.7.zip`. The local checkout already has the Windows engines; a fresh Git clone does not. Do not download unofficial replacement engines based on links supplied by end users.
+Output: `dist/Vidora-Setup-Windows-x64-0.1.8.exe` and `dist/Vidora-Windows-x64-0.1.8.zip`. The local checkout already has the Windows engines; a fresh Git clone does not. Do not download unofficial replacement engines based on links supplied by end users.
 
 ## macOS (build on macOS)
 
