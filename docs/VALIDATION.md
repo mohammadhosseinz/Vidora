@@ -1,5 +1,14 @@
 # Validation
 
+## 0.1.10 — Linux x64 packages, 2026-10-06
+
+- Kept the application version at `0.1.10+11`. Built the Linux x64 DEB and portable archive with the Aparat extractor included.
+- Ubuntu 22.04 amd64 in Docker on the Apple Silicon host, with Flutter 3.41.2: `flutter analyze --no-pub` reported no issues; all 33 tests passed with the actual bundled download tools and a local H.264/AAC fixture. The separate public-network test remained skipped.
+- The release build completed successfully after retrying a Dart file-copy `EINTR` error in the emulated build environment.
+- Installed the DEB and checked its version, architecture, runtime dependencies and binary/plugin contents. The installed app rendered its interface in a visible 1280×720 window under Xvfb; its screenshot was inspected.
+- The actual `DesktopEngine` using the installed app's tools inspected the user's Aparat URL `https://www.aparat.com/v/spy285j`, found 12 qualities and its thumbnail, and downloaded the complete 120.4-second video. FFprobe confirmed H.264 video and AAC audio.
+- Checked the installed runtime binaries against the pinned SHA-256 manifest and compared the portable archive's app, runtime tools and plugin with the installed package. Both package checksums are recorded in `dist/SHA256SUMS.txt`. No native physical Linux machine was used for these checks.
+
 ## 0.1.10 — live service checks, 2026-10-06
 
 - Reproduced the original Aparat failure with the bundled yt-dlp 2026.08.19: its retired embed-page parser could not extract the title. The latest stable upstream version was already bundled.
@@ -12,7 +21,7 @@
 - The outdated upstream Aparat fixture `8dflw` is now gone (the current API returns HTTP 410); it is not counted as a successful service test.
 - Rebuilt and installed the 0.1.10 macOS DMG. Its native window/Quit smoke test passed (1080×768), and its interface rendered correctly. `DesktopEngine` using the installed app's tools found 12 qualities and the thumbnail for the user's Aparat link. Strict/deep signing verification still passed after extraction, with no Python bytecode added to the signed resources.
 - Native UI automation could not deliver text/button actions reliably to the Flutter form, so an automated GUI inspection/download flow is not claimed. The full download and stream checks above ran through the actual app engine.
-- The Windows 0.1.10 build kit includes the new extractor and updated packaging code. The existing Linux installers remain 0.1.9; Linux 0.1.10 has not been rebuilt in this pass.
+- The Windows 0.1.10 build kit includes the new extractor and updated packaging code. Linux 0.1.10 packages were subsequently rebuilt and checked as recorded above.
 
 ## 0.1.9 — macOS window correction, 2026-10-06
 

@@ -6,6 +6,7 @@
 - Bundle the Aparat extractor on each platform and enable only the app's own plugin directory.
 - Show login/password restrictions clearly, including Vimeo's login-required response.
 - Verify full Aparat and Dailymotion downloads with the app engine, with audio and video checked by FFprobe.
+- Rebuild the Linux x64 DEB and portable packages with the Aparat fix, keeping version 0.1.10.
 
 ## 0.1.9 — 2026-10-06
 
