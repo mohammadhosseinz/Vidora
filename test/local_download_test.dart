@@ -23,6 +23,7 @@ void main() {
           final result = await Process.run(
             Platform.environment['FIXTURE_FFMPEG'] ?? engine.exe('ffmpeg'),
             ['-v', 'error', ...args],
+            workingDirectory: dir.path,
           );
           expect(result.exitCode, 0, reason: result.stderr.toString());
         }

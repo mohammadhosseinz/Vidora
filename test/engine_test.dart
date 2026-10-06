@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:local_video/engine.dart';
 import 'package:local_video/strings.dart';
+import 'package:path/path.dart' as p;
 
 void main() {
   test(
@@ -146,7 +147,7 @@ void main() {
       final engine = DesktopEngine(toolsDirectory: dir.path);
       expect(engine.common, contains('--no-plugin-dirs'));
       expect(engine.common, isNot(contains('--plugin-dirs')));
-      final plugins = Directory('${dir.path}/plugins');
+      final plugins = Directory(p.join(dir.path, 'plugins'));
       await plugins.create();
       final arguments = engine.common;
       expect(
