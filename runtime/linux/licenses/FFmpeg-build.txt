@@ -1,0 +1,5 @@
+BtbN FFmpeg n9.0 Linux x64 LGPL build.
+Archive SHA256: afbacbb3b722fcc3ebec0bfc255450dd57ae24faed6c7a8e9aef9bd559a00cdf
+Release: https://github.com/BtbN/FFmpeg-Builds/releases
+Build scripts and library versions: https://github.com/BtbN/FFmpeg-Builds
+Gather the complete corresponding source for this build and linked libraries before public distribution.

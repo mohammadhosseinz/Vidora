@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.1.10 — 2026-10-06
+
+- Read Aparat's current public player API and offer its MP4 and HLS qualities after the site's embed-page change.
+- Bundle the Aparat extractor on each platform and enable only the app's own plugin directory.
+- Show login/password restrictions clearly, including Vimeo's login-required response.
+- Verify full Aparat and Dailymotion downloads with the app engine, with audio and video checked by FFprobe.
+
+## 0.1.9 — 2026-10-06
+
+- Preserve the macOS window size when attaching Flutter so the app opens with a visible interface; check window dimensions in the native launch smoke test.
+- Shorter, clearer interface text and guides in all four languages.
+- Versioned macOS/Linux packages and a Windows build kit with bundled download tools.
+- Windows packaging checks runtime hashes and includes the Visual Studio redistributable files.
+- macOS packaging preserves the JIT entitlement needed by Deno and sends Quit through download cleanup.
+- Stop the complete Unix download process tree, including descendants that ignore TERM, and prevent new work while closing.
+- Download silent streams without requiring a nonexistent audio track; use the inspected audio format for both merging and size estimates.
+- Offer WebM only for compatible streams and reset incompatible output choices when quality changes.
+- Display known, estimated and unknown download sizes in all four interface languages.
+- Add process cancellation, format compatibility, UI and local yt-dlp/FFmpeg download regression tests.
+
 ## 0.1.8
 - Replace the cookie help's chat-specific warning with an expandable, translated guide for exporting Netscape cookies using Get cookies.txt LOCALLY.
 - Add a public support page with network-specific address QR codes and a custom GitHub Sponsor link.

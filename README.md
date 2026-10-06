@@ -2,73 +2,38 @@
 
 <img src="assets/brand/vidora-logo.png" width="144" alt="Vidora logo">
 
-A local-first desktop video downloader built with Flutter, yt-dlp, FFmpeg and Deno. The interface supports **Persian, Arabic, English and Chinese**, including RTL layouts for Persian and Arabic.
+Paste a video link, pick a quality and save it to your computer. Vidora supports Persian, Arabic, English and Chinese, with right-to-left layouts for Persian and Arabic.
 
-[English](README.md) · [فارسی](README.fa.md) · [العربية](README.ar.md) · [中文](README.zh.md) · [Build and packaging](docs/BUILD.md) · [Cookies](docs/COOKIES.fa.md) · [Support](docs/SUPPORT.md)
+[فارسی](README.fa.md) · [العربية](README.ar.md) · [中文](README.zh.md)
 
-## About us
+## Using Vidora
 
-**Author: Zolfaghari.** Vidora aims to make local video downloads simple while respecting your privacy. English is the default interface language; Persian, Arabic and Chinese are available from the language selector.
+1. Paste a link and click **Inspect link**.
+2. Choose a quality, file format and destination folder.
+3. Start the download. You can queue more videos, cancel a download or retry it later.
 
-## What works
+The app shows the title, thumbnail, available qualities and download size when the site provides it. Separate audio and video tracks are saved together in one file. WebM is available when the selected tracks support it.
 
-- Paste a link to inspect its title, thumbnail and available video formats.
-- Choose quality and container; see known or estimated download sizes including separate audio.
-- Choose a destination, queue downloads, view progress/speed, cancel or retry, and open the output folder.
-- Use system, direct or explicit HTTP/SOCKS proxy settings.
-- Optionally select a local Netscape cookies.txt file for the target site.
-- Download and merge audio/video entirely on your device.
+Videos are saved on your device. There is no Vidora account or storage server. The app connects to the source site to inspect and download the video. Cookies are optional; choose a local cookies.txt file when a site needs your signed-in session. See the [cookie guide](docs/COOKIES.fa.md).
 
-There is **no Vidora backend, cloud storage or app account**. The app contacts the source video/thumbnail sites. An optional donation page opens only when requested; no video URL, cookie jar or downloaded file is passed to it.
+Some links may stop working after a site changes. Private videos, expired links, regional restrictions and DRM can also prevent a download. Cookies do not make every video downloadable.
 
-## Status
+## Install or build
 
-Version **0.1.7**. Windows x64 release builds and automated tests have been run locally. macOS and Linux source runners and packaging scripts are included, but their native release builds have not been tested on this Windows machine. Android is not implemented yet; `DownloadEngine` provides the engine boundary for a future mobile adapter.
+Version **0.1.10**. Local packages are written to `dist/`:
 
-Site support is best effort. Login restrictions, anti-bot checks, DRM, geography, expired links and site changes may prevent a download. Successful YouTube downloads reported by the project owner do not guarantee every YouTube link will work.
+- **macOS, Apple Silicon:** open the DMG and drag Vidora into Applications.
+- **Linux, x64:** install the DEB on Ubuntu/Debian, or extract the portable archive.
+- **Windows, x64:** the build kit includes the source and download tools. Build it on Windows to create the EXE installer and portable ZIP.
 
-## Run from this checkout
+Complete app packages include the download tools. A fresh Git clone needs those tools staged separately; they are excluded from Git. The [build guide](docs/BUILD.md) covers prerequisites, packaging and tests. Test results are recorded in [validation notes](docs/VALIDATION.md).
 
-Requires Flutter (tested with **3.41.2 / Dart 3.11**), a desktop build toolchain and the four local engine binaries. End users of a complete installer do not install Python, FFmpeg or Deno themselves.
+Vidora is built with Flutter, yt-dlp, FFmpeg and Deno. Desktop builds use Flutter **3.41.2 / Dart 3.11**. Android is not available yet.
 
-```powershell
-flutter pub get
-$env:LOCAL_VIDEO_TOOLS = (Resolve-Path runtime/windows).Path
-flutter run -d windows
-```
+## About and support
 
-Runtime binaries are present in the developer's local checkout but are **excluded from Git**. A fresh clone must stage them using [the build guide](docs/BUILD.md). Never commit browser cookies or account secrets.
+Developed by **Zolfaghari**. If Vidora helps you, you can support future fixes and updates from the app's heart button or the [support page](docs/SUPPORT.md). Support is optional; all features are free.
 
-```sh
-flutter analyze
-flutter test
-```
+## License
 
-The external-network smoke test is opt-in. Optional local engine integration tests require environment variables described in the build guide.
-
-## Project layout
-
-```text
-lib/          Flutter UI, translations, safe local process engine, cookies and support
-assets/       Fonts, logo and public donation configuration
-windows/      Windows runner
-macos/        macOS runner and entitlements
-linux/        Linux runner
-runtime/      Local engines, recorded hashes and dependency notices
-scripts/      Runtime preparation and native packaging
-test/         Engine, privacy, localization and support tests
-docs/         Build, cookie, support and release documentation
-dist/         Local installers/portable builds (not committed)
-```
-
-## Support development
-
-If you find Vidora useful, consider supporting its development, bug fixes and updates. Support is optional and all features remain free.
-
-[Support Vidora — addresses and QR codes](docs/SUPPORT.md). You can also open this page from the app’s heart button.
-
-## License and distribution
-
-Vidora's own source uses the existing [MIT license](LICENSE). Dependencies retain their own licenses; MIT does not relicense yt-dlp's bundled libraries, FFmpeg, Deno, Flutter or the fonts. See [third-party notices](THIRD_PARTY_NOTICES.md).
-
-The locally staged FFmpeg build is GPLv3. **Before public distribution of installers containing that build, provide its complete corresponding source, including linked libraries and build information, as required by its license.** Current source pointers/build notices do not complete that release requirement. Release packages have not been published to GitHub by this task.
+Vidora's source is under the [MIT license](LICENSE). Bundled tools and fonts keep their own licenses. See [third-party notices](THIRD_PARTY_NOTICES.md).

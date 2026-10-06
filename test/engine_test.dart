@@ -112,7 +112,51 @@ void main() {
         },
       ],
     });
-    expect(noAudioSize.single.bytes, isNull);
+    expect(noAudioSize.single.bytes, 1000);
+    expect(noAudioSize.single.approximate, false);
+    expect(noAudioSize.single.needsMerge, false);
+  });
+  test('Aparat MP4 formats with unknown codecs remain selectable', () {
+    final qualities = parseQualities({
+      'formats': [
+        {
+          'format_id': 'http-source-0-0',
+          'ext': 'mp4',
+          'video_ext': 'mp4',
+          'vcodec': null,
+          'acodec': null,
+        },
+        {
+          'format_id': 'hls-779',
+          'height': 352,
+          'ext': 'mp4',
+          'video_ext': 'mp4',
+          'vcodec': null,
+          'acodec': null,
+        },
+      ],
+    });
+    expect(qualities.map((q) => q.id), ['hls-779', 'http-source-0-0']);
+    expect(qualities.every((q) => !q.needsMerge), isTrue);
+    expect(qualities.every((q) => q.containers.contains('mp4')), isTrue);
+  });
+  test('only the packaged plugin directory is enabled', () async {
+    final dir = await Directory.systemTemp.createTemp('vidora-plugin-test-');
+    try {
+      final engine = DesktopEngine(toolsDirectory: dir.path);
+      expect(engine.common, contains('--no-plugin-dirs'));
+      expect(engine.common, isNot(contains('--plugin-dirs')));
+      final plugins = Directory('${dir.path}/plugins');
+      await plugins.create();
+      final arguments = engine.common;
+      expect(
+        arguments.indexOf('--plugin-dirs'),
+        greaterThan(arguments.indexOf('--no-plugin-dirs')),
+      );
+      expect(arguments[arguments.indexOf('--plugin-dirs') + 1], plugins.path);
+    } finally {
+      await dir.delete(recursive: true);
+    }
   });
   test(
     'connection mode uses safe argument lists and preserves empty proxy',
@@ -158,6 +202,15 @@ void main() {
   );
   test('proxy, anti-bot and restricted failures have distinct messages', () {
     expect(classify('Unable to connect to proxy'), Failure.proxy);
+    expect(
+      classify('The web client only works when logged-in'),
+      Failure.restricted,
+    );
+    expect(classify('HTTP Error 401: Unauthorized'), Failure.restricted);
+    expect(
+      classify('This video is protected by a password'),
+      Failure.restricted,
+    );
     expect(classify("Sign in to confirm you’re not a bot"), Failure.bot);
     expect(classify('This video is unavailable'), Failure.restricted);
     expect(classify('Connection reset by peer'), Failure.network);

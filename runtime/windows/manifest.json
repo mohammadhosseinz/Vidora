@@ -2,25 +2,28 @@
   "platform": "windows",
   "arch": "x64",
   "sources": {
-    "yt-dlp": "https://github.com/yt-dlp/yt-dlp/releases/tag/2026.08.19",
-    "deno": "https://github.com/denoland/deno/releases/tag/v2.9.7",
-    "ffmpeg": "https://www.gyan.dev/ffmpeg/builds/",
-    "ffmpegSource": "https://github.com/FFmpeg/FFmpeg/commit/b08d7969c5"
+    "yt-dlp": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.08.19/yt-dlp.exe",
+    "deno": "https://github.com/denoland/deno/releases/download/v2.9.7/deno-x86_64-pc-windows-msvc.zip",
+    "ffmpeg": "https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
   },
   "yt-dlp": {
     "sha256": "66674953fe251b89f4d08c5f0e35e0728679bd67ab3d7d05c0562af101dd3e7a",
-    "version": "2026.08.19"
-  },
-  "ffmpeg": {
-    "sha256": "2ce797a0f88d7f067180338fb227f7b1928ea727bd9a4d7a1d022f7c52af71a3",
-    "version": "ffmpeg version 7.1-essentials_build-www.gyan.dev Copyright (c) 2000-2024 the FFmpeg developers"
-  },
-  "ffprobe": {
-    "sha256": "436bf02524d50135ed9965b90d1e0ad7f26c5c236132613a2edb87ef8b6873d0",
-    "version": "ffprobe version 7.1-essentials_build-www.gyan.dev Copyright (c) 2007-2024 the FFmpeg developers"
+    "version": "2026.08.19",
+    "executedOnBuildHost": false
   },
   "deno": {
     "sha256": "e020f3e232bd16e33768dee528e5983349c962952051ced0a5d58ad42f5d9b33",
-    "version": "deno 2.9.7 (stable, release, x86_64-pc-windows-msvc)"
+    "version": "v2.9.7",
+    "executedOnBuildHost": false
+  },
+  "ffmpeg": {
+    "sha256": "3256173f3f8bffd7df12227c68adf68025edb1832273a9530688a7bb1ed8edec",
+    "version": "9.0.2",
+    "executedOnBuildHost": false
+  },
+  "ffprobe": {
+    "sha256": "f0d36ecbbdd3bcfac3efa078c96c7271c2e68b3810595552ac3b7f17e9a65c52",
+    "version": "9.0.2",
+    "executedOnBuildHost": false
   }
 }

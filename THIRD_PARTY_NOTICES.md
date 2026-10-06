@@ -1,19 +1,17 @@
-# Third-party licenses and runtime distribution
+# Third-party notices
 
-The repository's MIT LICENSE applies to Vidora's own source. Dependencies and bundled components retain their respective terms.
+The MIT license covers Vidora's own source. The tools, libraries and fonts below keep their own licenses.
 
-- Flutter/Dart and packages: package notices are included by Flutter in the compiled app.
-- Noto Arabic and Chinese fonts: SIL Open Font License files are in `assets/fonts/`.
-- yt-dlp standalone executable: upstream license and bundled Python/EJS/other dependency notices in `runtime/windows/licenses/`.
-- Deno: MIT notice in `runtime/windows/licenses/`.
-- Local FFmpeg/FFprobe 7.1 build: GPLv3, with build/readme/license notes under `runtime/windows/licenses/` and engine hashes in `runtime/windows/manifest.json`.
+- **Flutter, Dart and packages:** their notices are available from the application's Licenses screen.
+- **Noto fonts:** SIL Open Font License. Copies are included in `assets/fonts` and the packaged tool notices.
+- **yt-dlp:** upstream license and bundled dependency notices are included in each runtime's `licenses` folder. Source: https://github.com/yt-dlp/yt-dlp/tree/2026.08.19
+- **Deno:** MIT license, included with each runtime. Source: https://github.com/denoland/deno/tree/v2.9.7
+- **macOS FFmpeg/FFprobe 9.0.2:** built locally under LGPL 2.1 or later, using Apple system frameworks. The unmodified FFmpeg source archive, license and build instructions are included with the tools.
+- **Linux FFmpeg/FFprobe:** BtbN LGPL build. The upstream license and build/source references are included with the tools. Build project: https://github.com/BtbN/FFmpeg-Builds
+- **Windows FFmpeg/FFprobe:** Gyan essentials build under GPLv3. Its license, build information and source references are included with the tools. Build project: https://www.gyan.dev/ffmpeg/builds/
 
-FFmpeg's GPL build requires appropriate complete corresponding source for FFmpeg and linked libraries when distributing binaries. The current runtime build notices/source pointers do not yet complete that public distribution requirement. Resolve it before publishing installers/portable archives to a public release. Runtime binaries and local archives are deliberately excluded from Git.
+Each runtime's `manifest.json` records tool versions, source URLs and SHA256 hashes. Runtime executables and release archives are excluded from Git.
 
-References:
-- https://ffmpeg.org/legal.html
-- https://github.com/yt-dlp/yt-dlp
-- https://github.com/yt-dlp/yt-dlp/wiki/EJS
-- https://github.com/denoland/deno
+Before publishing packages containing FFmpeg, provide the corresponding source and build information required by the chosen build's license, including linked libraries. The macOS build includes its FFmpeg source; the Windows and Linux vendor builds need their complete corresponding source gathered before a public release. These packages are prepared for local use and have not been published.
 
-No browser cookies, payment secrets, app accounts or user media are distributed with this source.
+FFmpeg license information: https://ffmpeg.org/legal.html

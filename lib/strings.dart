@@ -2,10 +2,10 @@ const languages = {'en': 'English', 'fa': 'فارسی', 'ar': 'العربية', 
 const words = <String, List<String>>{
   'about': ['دربارهٔ ویدورا', 'حول فيدورا', 'About Vidora', '关于 Vidora'],
   'aboutBody': [
-    'ویدورا یک دانلودر رایگان و محلی ویدیو است. بررسی لینک، دانلود و پردازش فایل روی دستگاه شما انجام می‌شود. هدف ما تجربه‌ای ساده و احترام به حریم خصوصی شماست.',
-    'فيدورا تطبيق مجاني ومحلي لتنزيل الفيديو. يجري فحص الروابط والتنزيل ومعالجة الملفات على جهازك. هدفنا تجربة بسيطة تحترم خصوصيتك.',
-    'Vidora is a free local video downloader. Link inspection, downloads and file processing take place on your device. We aim for a simple experience that respects your privacy.',
-    'Vidora 是一款免费的本地视频下载应用。链接检查、下载和文件处理均在您的设备上完成。我们致力于提供简单易用、尊重隐私的体验。',
+    'ویدورا برنامه‌ای رایگان برای دانلود ویدیوست. لینک را وارد کنید، کیفیت را انتخاب کنید و فایل را روی دستگاه خودتان ذخیره کنید.',
+    'فيدورا تطبيق مجاني لتنزيل الفيديو. الصق الرابط، اختر الجودة واحفظ الفيديو على جهازك.',
+    'Vidora is a free video downloader. Paste a link, choose a quality and save the video to your device.',
+    'Vidora 是一款免费的视频下载工具。粘贴链接、选择画质，就能把视频保存到自己的设备上。',
   ],
   'aboutAuthor': [
     'نویسندهٔ برنامه: ذوالفقاری',
@@ -14,10 +14,10 @@ const words = <String, List<String>>{
     '作者：Zolfaghari',
   ],
   'aboutSupport': [
-    'اگر ویدورا برایتان مفید بوده، می‌توانید از ادامهٔ توسعه، رفع اشکال‌ها و انتشار به‌روزرسانی‌ها حمایت کنید. حمایت کاملاً اختیاری است و همهٔ امکانات رایگان می‌مانند.',
-    'إذا أفادك فيدورا، يمكنك دعم تطويره وإصلاح الأخطاء وإصدار التحديثات. الدعم اختياري تماماً وتبقى جميع الميزات مجانية.',
-    'If you find Vidora useful, consider supporting its development, bug fixes and updates. Support is optional and all features remain free.',
-    '如果 Vidora 对您有帮助，欢迎支持后续开发、问题修复和更新。支持完全自愿，所有功能仍然免费。',
+    'اگر ویدورا به کارتان آمده، با حمایتتان به بهتر شدن برنامه کمک کنید. استفاده از همهٔ امکانات رایگان است.',
+    'إذا أفادك فيدورا، يمكنك المساهمة في تطويره. جميع الميزات مجانية، والدعم اختياري.',
+    'If Vidora has been useful to you, a donation helps me keep improving it. Every feature is free to use.',
+    '如果 Vidora 帮到了您，欢迎支持后续开发。所有功能免费，支持完全自愿。',
   ],
   'unknownSize': ['حجم نامشخص', 'الحجم غير معروف', 'Size unknown', '大小未知'],
   'approximately': ['حدود ', 'حوالي ', 'About ', '约 '],
@@ -28,10 +28,10 @@ const words = <String, List<String>>{
     '预览不可用',
   ],
   'sizeHint': [
-    'حجم شامل صدا است؛ مقدارهای «حدود» تخمینی‌اند و حجم نهایی پس از ترکیب ممکن است کمی متفاوت باشد.',
-    'الحجم يشمل الصوت؛ القيم التقريبية والحجم النهائي قد تختلف.',
-    'Size includes audio. Estimates and the final merged file size may differ.',
-    '大小包含音频；估计值与合并后的最终大小可能不同。',
+    'حجم نمایش‌داده‌شده شامل صدا هم می‌شود. حجم نهایی ممکن است کمی فرق کند.',
+    'الحجم المعروض يشمل الصوت. قد يختلف حجم الملف النهائي قليلاً.',
+    'The size includes audio. The saved file may be slightly larger or smaller.',
+    '显示的大小包含音频，最终文件大小可能略有不同。',
   ],
   'copyAddress': [
     'کپی آدرس کیف پول',
@@ -48,10 +48,10 @@ const words = <String, List<String>>{
   ],
   'support': ['حمایت از ویدورا', 'دعم فيدورا', 'Support Vidora', '支持 Vidora'],
   'supportBody': [
-    'اگر ویدورا برایتان مفید بوده، می‌توانید به ادامهٔ توسعهٔ آن کمک کنید. حمایت کاملاً اختیاری است و همهٔ امکانات رایگان می‌مانند.',
-    'إذا أفادك فيدورا، يمكنك دعم تطويره. الدعم اختياري وجميع الميزات تبقى مجانية.',
-    'If Vidora helps you, you can support its continued development. Support is optional and all features remain free.',
-    '如果 Vidora 对您有帮助，欢迎支持后续开发。支持完全自愿，所有功能仍然免费。',
+    'حمایت شما کمک می‌کند وقت بیشتری برای ویدورا بگذارم. هر مبلغی که مایل باشید؛ برنامه برای همه رایگان می‌ماند.',
+    'دعمك يساعدني على تخصيص وقت أكبر لفيدورا. اختر المبلغ المناسب لك؛ يظل التطبيق مجانياً للجميع.',
+    'Your support gives me more time to work on Vidora. Give whatever you like; the app stays free for everyone.',
+    '您的支持让我能投入更多时间改进 Vidora。金额随意，应用始终免费。',
   ],
   'supportUnavailable': [
     'لینک حمایت به‌زودی اضافه می‌شود.',
@@ -103,10 +103,10 @@ const words = <String, List<String>>{
     '下次检查不使用 Cookie',
   ],
   'cookiesHelp': [
-    'اگر سایت برای دانلود به ورود به حساب یا تأیید مرورگر نیاز دارد، فایل کوکی همان سایت را اینجا انتخاب کنید. مرورگر و ویدورا باید از همان VPN یا پراکسی استفاده کنند. فایل اصلی تغییر نمی‌کند و کپی موقت پس از بررسی یا دانلود پاک می‌شود. انتخاب فایل برای همین اجرای برنامه است؛ دانلودهای صف از کوکی زمان بررسی خود استفاده می‌کنند.',
-    'إذا احتاج الموقع إلى تسجيل الدخول أو تحقق في المتصفح، اختر ملف كوكيز ذلك الموقع هنا. استخدم VPN أو الوكيل نفسه في المتصفح وفيدورا. لا يتغير الملف الأصلي وتُحذف النسخة المؤقتة بعد الفحص أو التنزيل. الاختيار لهذه الجلسة؛ التنزيلات في القائمة تستخدم كوكيز وقت فحصها.',
-    'If the site requires sign-in or a browser check, choose that site’s cookie file here. Use the same VPN or proxy in your browser and Vidora. The original file is unchanged and temporary copies are deleted after inspection or download. Selection lasts for this app session; queued downloads use the cookies from their inspection.',
-    '如果网站要求登录或浏览器验证，请在此选择该网站的 Cookie 文件。浏览器和 Vidora 应使用相同的 VPN 或代理。原文件保持不变，临时副本在检查或下载后删除。文件选择仅用于本次运行；队列中的下载使用检查时的 Cookie。',
+    'برای سایت‌هایی که نیاز به ورود دارند، فایل کوکی همان سایت را انتخاب کنید. مرورگر و ویدورا باید از یک VPN یا پراکسی استفاده کنند. فایل اصلی دست‌نخورده می‌ماند و کپی موقت بعد از دانلود پاک می‌شود. فایل انتخابی فقط برای همین اجرای برنامه است؛ دانلودهای داخل صف از کوکی زمان بررسی لینک استفاده می‌کنند.',
+    'إذا تطلب الموقع تسجيل الدخول، اختر ملف الكوكيز الخاص به. استخدم VPN أو الوكيل نفسه في المتصفح وفيدورا. يبقى الملف الأصلي كما هو وتُحذف النسخة المؤقتة بعد التنزيل. يُستخدم الملف في هذه الجلسة فقط؛ تحتفظ التنزيلات في القائمة بكوكيز وقت فحص الرابط.',
+    'For sites that need a login, choose a cookie file from that site. Use the same VPN or proxy in your browser and Vidora. Your original file stays untouched and the temporary copy is deleted after use. The file is used for this session only; queued downloads keep the cookies from when their links were checked.',
+    '如果网站要求登录，请选择该网站的 Cookie 文件。浏览器和 Vidora 应使用相同的 VPN 或代理。原文件保持不变，临时副本在使用后删除。文件仅用于本次运行；队列中的下载保留检查链接时的 Cookie。',
   ],
   'cookiesGuideTitle': [
     'راهنمای گرفتن کوکی با افزونه',
@@ -132,12 +132,7 @@ const words = <String, List<String>>{
     'No unexpired cookies match this site. Refresh the browser session and export that site’s cookies again.',
     '文件中没有匹配该网站的有效 Cookie，请刷新浏览器会话并重新导出。',
   ],
-  'automatic': [
-    'خودکار (سیستم، سپس بدون پراکسی در صورت خطای اتصال)',
-    'تلقائي (النظام ثم بدون وكيل عند خطأ الاتصال)',
-    'Automatic (system, then no proxy on connection failure)',
-    '自动（系统，连接失败时尝试无代理）',
-  ],
+  'automatic': ['خودکار', 'تلقائي', 'Automatic', '自动'],
   'connection': ['روش اتصال', 'طريقة الاتصال', 'Connection', '连接方式'],
   'system': [
     'تنظیمات پراکسی سیستم',
@@ -159,10 +154,10 @@ const words = <String, List<String>>{
     'HTTP 或 SOCKS5 代理地址',
   ],
   'proxyHint': [
-    'مثال: http://127.0.0.1:12334 — پراکسی باید روشن باشد؛ اتصال مستقیم نیازمند دسترسی شبکه به سایت است.',
-    'مثال: http://127.0.0.1:12334 — يجب تشغيل الوكيل؛ الاتصال المباشر يتطلب الوصول إلى الموقع.',
-    'Example: http://127.0.0.1:12334 — the proxy must be running. Direct mode requires network access to the site.',
-    '示例：http://127.0.0.1:12334 — 代理必须已启动，直连模式需要网络能访问该网站。',
+    'در حالت خودکار، اول پراکسی سیستم امتحان می‌شود و اگر اتصال برقرار نشد، برنامه بدون پراکسی تلاش می‌کند. برای پراکسی مشخص، آدرس و پورت را وارد کنید؛ مثلاً http://127.0.0.1:12334.',
+    'في الوضع التلقائي، يُجرّب وكيل النظام أولاً ثم الاتصال المباشر إذا فشل. للوكيل المخصص، أدخل العنوان والمنفذ؛ مثلاً http://127.0.0.1:12334.',
+    'Automatic mode tries the system proxy first, then a direct connection if it fails. For a custom proxy, enter its address and port, such as http://127.0.0.1:12334.',
+    '自动模式先尝试系统代理，连接失败后尝试直连。使用自定义代理时，请输入地址和端口，例如 http://127.0.0.1:12334。',
   ],
   'proxy': [
     'اتصال به پراکسی برقرار نشد. برنامهٔ پراکسی را روشن و آدرس و پورت را بررسی کنید، یا روش اتصال را تغییر دهید.',
@@ -196,10 +191,10 @@ const words = <String, List<String>>{
   ],
   'app': ['ویدورا', 'فيدورا', 'Vidora', 'Vidora'],
   'privacy': [
-    'پردازش و ذخیره روی دستگاه شما؛ پشتیبانی سایت‌ها به بهترین تلاش',
-    'المعالجة والحفظ على جهازك؛ دعم المواقع حسب الإمكان',
-    'Processing and storage on your device; site support is best effort',
-    '在您的设备上处理和保存；尽力支持各网站',
+    'ویدیوها روی دستگاه خودتان ذخیره می‌شوند.',
+    'تُحفظ الفيديوهات على جهازك.',
+    'Videos are saved to your device.',
+    '视频保存在您自己的设备上。',
   ],
   'link': [
     'لینک ویدیو را اینجا بچسبانید',
@@ -210,6 +205,12 @@ const words = <String, List<String>>{
   'inspect': ['بررسی لینک', 'فحص الرابط', 'Check link', '检查链接'],
   'quality': ['کیفیت', 'الجودة', 'Quality', '画质'],
   'format': ['فرمت خروجی', 'صيغة الملف', 'Output format', '输出格式'],
+  'incompatibleFormat': [
+    'فرمت خروجی با این کیفیت سازگار نیست؛ فرمت دیگری انتخاب کنید.',
+    'صيغة الإخراج غير متوافقة مع هذه الجودة؛ اختر صيغة أخرى.',
+    'This output format is incompatible with the selected quality. Choose another format.',
+    '输出格式与所选画质不兼容，请选择其他格式。',
+  ],
   'folder': ['انتخاب پوشه', 'اختر مجلداً', 'Choose folder', '选择文件夹'],
   'download': [
     'افزودن به صف دانلود',
@@ -256,16 +257,16 @@ const words = <String, List<String>>{
     '无法连接网站，请检查网络和网站访问权限。',
   ],
   'extraction': [
-    'استخراج یا تبدیل ویدیو ناموفق بود؛ لینک ممکن است محدود باشد یا موتور به به‌روزرسانی نیاز داشته باشد.',
-    'تعذر استخراج أو تحويل الفيديو؛ قد يكون مقيداً أو يحتاج المحرك إلى تحديث.',
-    'Extraction or conversion failed. The video may be restricted or the engine may need updating.',
-    '提取或转换失败。视频可能受限，或下载引擎需要更新。',
+    'ویدیو دانلود نشد. دوباره امتحان کنید؛ اگر خطا تکرار شد، لینک دیگری را بررسی کنید یا برنامه را به‌روز کنید.',
+    'تعذر تنزيل الفيديو. حاول مجدداً؛ إذا استمر الخطأ، جرّب رابطاً آخر أو حدّث التطبيق.',
+    'The video could not be downloaded. Try again. If it keeps failing, try another link or update the app.',
+    '视频下载失败，请重试。如果仍然失败，请尝试其他链接或更新应用。',
   ],
   'tools': [
-    'موتورهای همراه برنامه پیدا نشدند؛ بستهٔ کامل برنامه را استفاده کنید.',
-    'محركات التطبيق غير موجودة؛ استخدم الحزمة الكاملة.',
-    'Bundled tools are missing. Use the complete app package.',
-    '缺少随附工具，请使用完整应用程序包。',
+    'بعضی فایل‌های برنامه پیدا نشدند. ویدورا را با بستهٔ کامل دوباره نصب کنید.',
+    'بعض ملفات التطبيق مفقودة. أعد تثبيت فيدورا باستخدام الحزمة الكاملة.',
+    'Some app files are missing. Reinstall Vidora using the complete package.',
+    '部分应用文件缺失，请使用完整安装包重新安装 Vidora。',
   ],
   'storage': [
     'ذخیرهٔ فایل ممکن نشد؛ مجوز و فضای پوشه را بررسی کنید.',
@@ -274,10 +275,10 @@ const words = <String, List<String>>{
     '无法保存文件，请检查文件夹权限和可用空间。',
   ],
   'merge': [
-    'صدا با FFmpeg محلی ترکیب می‌شود',
-    'سيتم دمج الصوت بواسطة FFmpeg محلياً',
-    'Audio will be merged locally with FFmpeg',
-    '将使用本地 FFmpeg 合并音频',
+    'صدا و تصویر در یک فایل ذخیره می‌شوند.',
+    'سيُحفظ الصوت والفيديو في ملف واحد.',
+    'Audio and video will be saved in one file.',
+    '音频和视频将保存为一个文件。',
   ],
 };
 String tr(String locale, String key) =>

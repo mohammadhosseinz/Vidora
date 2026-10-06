@@ -1,0 +1,29 @@
+{
+  "platform": "macos",
+  "arch": "arm64",
+  "sources": {
+    "yt-dlp": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.08.19/yt-dlp_macos",
+    "deno": "https://github.com/denoland/deno/releases/download/v2.9.7/deno-aarch64-apple-darwin.zip",
+    "ffmpeg": "https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz"
+  },
+  "yt-dlp": {
+    "sha256": "0f192b7ec147ab6288885d6351d9ab67367640029b4377576ef46dd79cf7b202",
+    "version": "2026.08.19",
+    "executedOnBuildHost": true
+  },
+  "deno": {
+    "sha256": "b73737579d5a84c160e3316487594783fa5c15f4e13252a6a07050b755317f1a",
+    "version": "deno 2.9.7 (stable, release, aarch64-apple-darwin)",
+    "executedOnBuildHost": true
+  },
+  "ffmpeg": {
+    "sha256": "4baf885ce3c105300b56479c84ec1bcad90b412ae7f4ff3c0bf57f061163e9b0",
+    "version": "ffmpeg version 9.0.2 Copyright (c) 2000-2026 the FFmpeg developers",
+    "executedOnBuildHost": true
+  },
+  "ffprobe": {
+    "sha256": "bb4f941b827c40bf4848d55a4219731997cff54c70c2172f1af617c7116bec2a",
+    "version": "ffprobe version 9.0.2 Copyright (c) 2007-2026 the FFmpeg developers",
+    "executedOnBuildHost": true
+  }
+}

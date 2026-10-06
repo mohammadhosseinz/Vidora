@@ -1,0 +1,29 @@
+{
+  "platform": "linux",
+  "arch": "x64",
+  "sources": {
+    "yt-dlp": "https://github.com/yt-dlp/yt-dlp/releases/download/2026.08.19/yt-dlp_linux",
+    "deno": "https://github.com/denoland/deno/releases/download/v2.9.7/deno-x86_64-unknown-linux-gnu.zip",
+    "ffmpeg": "https://github.com/BtbN/FFmpeg-Builds/releases/download/latest/ffmpeg-n9.0-latest-linux64-lgpl-9.0.tar.xz"
+  },
+  "yt-dlp": {
+    "sha256": "58162f9bfdc27458ea47bfcb311cf47028f17d8154a8bf7d689861d46399230a",
+    "version": "2026.08.19",
+    "executedOnBuildHost": false
+  },
+  "deno": {
+    "sha256": "ce6a052beb97c2b92de67077e3f3924ba7c9661ede0d8dc2f66a116a3c841f21",
+    "version": "v2.9.7",
+    "executedOnBuildHost": false
+  },
+  "ffmpeg": {
+    "sha256": "8b3237f366672e2cc987f0dc2deb16e1e4915459132cb2e02ee69201ff810e12",
+    "version": "9.0",
+    "executedOnBuildHost": false
+  },
+  "ffprobe": {
+    "sha256": "844c1ab335d8303f61d7048e7624b22533f2ffff2d2f95c1ee5daacd33ecc236",
+    "version": "9.0",
+    "executedOnBuildHost": false
+  }
+}

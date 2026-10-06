@@ -1,0 +1,8 @@
+FFmpeg 9.0.2, LGPL 2.1 or later.
+Source: https://ffmpeg.org/releases/ffmpeg-9.0.2.tar.xz
+Complete unmodified source is included next to this file.
+Built on macOS arm64 with Apple Command Line Tools.
+Configure: ./configure --disable-doc --disable-debug --disable-autodetect --disable-shared --enable-static --disable-ffplay --enable-securetransport --enable-videotoolbox
+Build: make -j4
+No external codecs or third-party libraries are linked. Apple system frameworks are required.
+For modified linking, build FFmpeg from the included source and replace tools/ffmpeg and tools/ffprobe. Re-sign the application after replacement.

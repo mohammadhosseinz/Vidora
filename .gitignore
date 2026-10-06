@@ -54,6 +54,8 @@ app.*.map.json
 /runtime/**/ffprobe
 /runtime/**/*.zip
 /runtime/**/*.dll
+/runtime/**/*.tar.xz
+/runtime/**/*.tar.gz
 # Session secrets and local settings
 cookies.txt
 *.cookies.txt

@@ -7,6 +7,7 @@ import 'cookies.dart';
 
 enum Failure {
   invalid,
+  incompatibleFormat,
   unsupported,
   network,
   proxy,
@@ -90,6 +91,10 @@ Failure classify(String message) {
     'sign in',
     'members-only',
     'age-restricted',
+    'logged-in',
+    'login required',
+    'protected by a password',
+    'http error 401',
     'not available in your country',
   ].any(s.contains))
     return Failure.restricted;
@@ -123,6 +128,7 @@ class Quality {
   final bool audio;
   final int? bytes;
   final bool approximate;
+  final String? videoCodec, audioCodec, audioId;
   Quality(
     this.id,
     this.ext,
@@ -130,7 +136,31 @@ class Quality {
     this.audio, {
     this.bytes,
     this.approximate = false,
+    this.videoCodec,
+    this.audioCodec,
+    this.audioId,
   });
+
+  bool get needsMerge => !audio && audioId != null;
+  String get selector => needsMerge ? '$id+$audioId' : id;
+
+  bool get supportsWebm {
+    // An existing WebM stream can stay WebM even when its codecs are unknown.
+    // Separate audio must have a known compatible codec before merging.
+    final videoCompatible =
+        (videoCodec == null && ext == 'webm') ||
+        ['vp8', 'vp9', 'vp09', 'av1', 'av01'].any(
+          (codec) =>
+              videoCodec == codec || videoCodec?.startsWith('$codec.') == true,
+        );
+    final audioCompatible =
+        (!audio && !needsMerge) ||
+        ['opus', 'vorbis'].contains(audioCodec) ||
+        (audioCodec == null && ext == 'webm' && !needsMerge);
+    return videoCompatible && audioCompatible;
+  }
+
+  List<String> get containers => ['mkv', 'mp4', if (supportsWebm) 'webm'];
 }
 
 ({int? bytes, bool approximate}) formatSize(
@@ -161,12 +191,14 @@ List<Quality> parseQualities(Map<String, dynamic> data) {
         (f) =>
             f['vcodec'] == 'none' &&
             f['acodec'] != 'none' &&
-            f['has_drm'] != true,
+            f['has_drm'] != true &&
+            RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch('${f['format_id']}'),
       )
       .toList();
-  final audioSize = audio.isEmpty
+  final bestAudio = audio.isEmpty ? null : audio.last;
+  final audioSize = bestAudio == null
       ? (bytes: null, approximate: true)
-      : formatSize(audio.last, data['duration'] as num?);
+      : formatSize(bestAudio, data['duration'] as num?);
   final result = <Quality>[];
   for (final f in formats) {
     if (f['vcodec'] == 'none' ||
@@ -176,10 +208,11 @@ List<Quality> parseQualities(Map<String, dynamic> data) {
         !RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch('${f['format_id']}'))
       continue;
     final hasAudio = f['acodec'] != 'none';
+    final needsMerge = !hasAudio && bestAudio != null;
     final size = formatSize(f, data['duration'] as num?);
-    final bytes = size.bytes == null || (!hasAudio && audioSize.bytes == null)
+    final bytes = size.bytes == null || (needsMerge && audioSize.bytes == null)
         ? null
-        : size.bytes! + (hasAudio ? 0 : audioSize.bytes!);
+        : size.bytes! + (needsMerge ? audioSize.bytes! : 0);
     result.add(
       Quality(
         '${f['format_id']}',
@@ -187,7 +220,10 @@ List<Quality> parseQualities(Map<String, dynamic> data) {
         (f['height'] as num? ?? 0).toInt(),
         hasAudio,
         bytes: bytes,
-        approximate: size.approximate || (!hasAudio && audioSize.approximate),
+        approximate: size.approximate || (needsMerge && audioSize.approximate),
+        videoCodec: f['vcodec'] as String?,
+        audioCodec: (needsMerge ? bestAudio['acodec'] : f['acodec']) as String?,
+        audioId: needsMerge ? '${bestAudio['format_id']}' : null,
       ),
     );
   }
@@ -256,6 +292,10 @@ class DesktopEngine implements DownloadEngine {
   List<String> get common => [
     '--ignore-config',
     '--no-plugin-dirs',
+    if (Directory(p.join(tools, 'plugins')).existsSync()) ...[
+      '--plugin-dirs',
+      p.join(tools, 'plugins'),
+    ],
     '--no-playlist',
     '--no-update',
     '--no-remote-components',
@@ -354,23 +394,28 @@ class DesktopEngine implements DownloadEngine {
     final connectionArgs = selectedConnection.arguments();
     await check();
     if (_closing) throw EngineException(Failure.extraction);
-    final proc = await Process.start(exe('yt-dlp'), [
-      ...common,
-      ...connectionArgs,
-      ...cookieArgs,
-      '--dump-single-json',
-      '--retries',
-      '1',
-      '--extractor-retries',
-      '0',
-      '--skip-download',
-      '--',
-      url,
-    ], runInShell: false);
+    final proc = await Process.start(
+      exe('yt-dlp'),
+      [
+        ...common,
+        ...connectionArgs,
+        ...cookieArgs,
+        '--dump-single-json',
+        '--retries',
+        '1',
+        '--extractor-retries',
+        '0',
+        '--skip-download',
+        '--',
+        url,
+      ],
+      runInShell: false,
+      environment: const {'PYTHONDONTWRITEBYTECODE': '1'},
+    );
     _inspection = proc;
-    if (_closing) proc.kill();
     final out = proc.stdout.transform(utf8.decoder).join();
     final err = proc.stderr.transform(utf8.decoder).join();
+    if (_closing) await _killTree(proc);
     int code;
     try {
       code = await proc.exitCode.timeout(timeout);
@@ -419,24 +464,30 @@ class DesktopEngine implements DownloadEngine {
       final info = File(p.join(dir.path, 'metadata.json'));
       await info.writeAsString(jsonEncode(data));
       if (_closing) return null;
-      process = await Process.start(exe('yt-dlp'), [
-        ...common,
-        ...connectionArgs,
-        ...cookieArgs,
-        '--socket-timeout',
-        '8',
-        '--retries',
-        '0',
-        '--skip-download',
-        '--write-thumbnail',
-        '--load-info-json',
-        info.path,
-        '-o',
-        p.join(dir.path, 'preview.%(ext)s'),
-      ], runInShell: false);
+      process = await Process.start(
+        exe('yt-dlp'),
+        [
+          ...common,
+          ...connectionArgs,
+          ...cookieArgs,
+          '--socket-timeout',
+          '8',
+          '--retries',
+          '0',
+          '--skip-download',
+          '--write-thumbnail',
+          '--load-info-json',
+          info.path,
+          '-o',
+          p.join(dir.path, 'preview.%(ext)s'),
+        ],
+        runInShell: false,
+        environment: const {'PYTHONDONTWRITEBYTECODE': '1'},
+      );
       _inspection = process;
       final stdoutDone = process.stdout.drain<void>();
       final stderrDone = process.stderr.drain<void>();
+      if (_closing) await _killTree(process);
       final code = await process.exitCode.timeout(const Duration(seconds: 12));
       await Future.wait([stdoutDone, stderrDone]);
       if (code != 0) return null;
@@ -472,8 +523,12 @@ class DesktopEngine implements DownloadEngine {
     validateLink(video.url);
     final connectionArgs = video.connection.arguments();
     if (!['mp4', 'mkv', 'webm'].contains(container) ||
-        !RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(quality.id))
+        !RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(quality.id) ||
+        (quality.audioId != null &&
+            !RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(quality.audioId!)))
       throw EngineException(Failure.invalid);
+    if (!quality.containers.contains(container))
+      throw EngineException(Failure.incompatibleFormat);
     await check();
     if (_closing) throw EngineException(Failure.extraction);
     final destination = Directory(folder);
@@ -484,37 +539,42 @@ class DesktopEngine implements DownloadEngine {
     try {
       cookieLease = await video.cookies?.stage();
       if (_cancelled.remove(id)) throw EngineException(Failure.extraction);
-      final proc = await Process.start(exe('yt-dlp'), [
-        ...common,
-        ...connectionArgs,
-        ...?cookieLease?.arguments,
-        '--newline',
-        '--no-color',
-        '--progress',
-        '--progress-template',
-        'download:PROGRESS:%(progress._percent_str)s|%(progress._speed_str)s',
-        '--print',
-        'after_move:FILE:%(filepath)s',
-        '--no-simulate',
-        '--windows-filenames',
-        '--no-overwrites',
-        '-f',
-        quality.audio ? quality.id : '${quality.id}+bestaudio',
-        '--merge-output-format',
-        container,
-        '--remux-video',
-        container,
-        '-o',
-        p.join(
-          temp.path.replaceAll('%', '%%'),
-          '${safeName(video.title)}.%(ext)s',
-        ),
-        '--',
-        video.url,
-      ], runInShell: false);
+      final proc = await Process.start(
+        exe('yt-dlp'),
+        [
+          ...common,
+          ...connectionArgs,
+          ...?cookieLease?.arguments,
+          '--newline',
+          '--no-color',
+          '--progress',
+          '--progress-template',
+          'download:PROGRESS:%(progress._percent_str)s|%(progress._speed_str)s',
+          '--print',
+          'after_move:FILE:%(filepath)s',
+          '--no-simulate',
+          '--windows-filenames',
+          '--no-overwrites',
+          '-f',
+          quality.selector,
+          '--merge-output-format',
+          container,
+          '--remux-video',
+          container,
+          '-o',
+          p.join(
+            temp.path.replaceAll('%', '%%'),
+            '${safeName(video.title)}.%(ext)s',
+          ),
+          '--',
+          video.url,
+        ],
+        runInShell: false,
+        environment: const {'PYTHONDONTWRITEBYTECODE': '1'},
+      );
       _running[id] = proc;
-      if (_cancelled.contains(id)) await cancel(id);
       final stderr = proc.stderr.transform(utf8.decoder).join();
+      if (_closing || _cancelled.contains(id)) await cancel(id);
       await for (final line
           in proc.stdout
               .transform(utf8.decoder)
@@ -579,19 +639,43 @@ class DesktopEngine implements DownloadEngine {
         '/F',
       ], runInShell: false);
     } else {
-      // Kill children (FFmpeg) before their parent, with numeric PID arguments.
-      await Process.run('pkill', [
-        '-TERM',
-        '-P',
-        '${proc.pid}',
+      // Snapshot the whole tree before the parent exits and children are
+      // reparented. Force-stop leaves first so inherited pipes also close.
+      final snapshot = await Process.run('ps', [
+        '-axo',
+        'pid=,ppid=',
       ], runInShell: false);
-      proc.kill(ProcessSignal.sigterm);
+      if (snapshot.exitCode != 0) {
+        proc.kill(ProcessSignal.sigkill);
+        throw EngineException(Failure.extraction);
+      }
+      final children = <int, List<int>>{};
+      for (final line in const LineSplitter().convert(
+        snapshot.stdout as String,
+      )) {
+        final fields = line.trim().split(RegExp(r'\s+'));
+        if (fields.length != 2) continue;
+        final pid = int.tryParse(fields[0]), parent = int.tryParse(fields[1]);
+        if (pid != null && parent != null)
+          children.putIfAbsent(parent, () => []).add(pid);
+      }
+      final tree = <int>[proc.pid];
+      final seen = <int>{proc.pid};
+      for (var index = 0; index < tree.length; index++) {
+        for (final child in children[tree[index]] ?? <int>[]) {
+          if (seen.add(child)) tree.add(child);
+        }
+      }
+      for (final pid in tree.skip(1).toList().reversed) {
+        Process.killPid(pid, ProcessSignal.sigkill);
+      }
+      proc.kill(ProcessSignal.sigkill);
     }
     try {
       await proc.exitCode.timeout(const Duration(seconds: 5));
     } on TimeoutException {
       proc.kill(ProcessSignal.sigkill);
-      await proc.exitCode;
+      await proc.exitCode.timeout(const Duration(seconds: 5));
     }
   }
 

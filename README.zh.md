@@ -1,50 +1,33 @@
 # Vidora
 
-[English](README.md) · [فارسی](README.fa.md) · [العربية](README.ar.md) · [中文](README.zh.md)
-
 <img src="assets/brand/vidora-logo.png" width="144" alt="Vidora 标志">
 
-Vidora 是一款免费的本地视频下载应用，使用 Flutter、yt-dlp、FFmpeg 和 Deno。界面支持英语、波斯语、阿拉伯语和中文，并支持波斯语与阿拉伯语的从右到左布局。**默认语言为英语**，可在语言菜单中切换。
+粘贴视频链接，选择画质，然后保存到电脑。Vidora 支持中文、英语、波斯语和阿拉伯语。
 
-## 关于我们
-**作者：Zolfaghari。** 我们希望让本地视频下载更简单，并尊重您的隐私。
+[English](README.md) · [فارسی](README.fa.md) · [العربية](README.ar.md)
 
-## 功能
-- 粘贴链接后自动检查，显示标题、预览图和可用画质。
-- 选择画质、封装格式和保存目录，显示已知或估计的下载大小，包含单独的音频。
-- 下载队列、进度、速度、取消、重试以及打开输出目录。
-- 支持直连、系统代理以及自定义 HTTP/SOCKS 代理。
-- 可选的站点专用 Netscape cookies.txt 文件；操作后删除临时副本。
-- 视频下载以及音视频合并均在用户设备上完成。
+## 使用方法
 
-Vidora 没有应用后端、云存储或应用账号。它会连接原始视频与缩略图网站；支持页面不会收到视频链接、Cookie 文件或下载的视频。
+1. 粘贴链接并检查视频。
+2. 选择画质、文件格式和保存文件夹。
+3. 开始下载。你可以添加多个视频到队列，也可以取消或重试下载。
 
-## 运行与构建
-当前版本为 **0.1.7**。Windows x64 版本已在本地构建和测试。包含 macOS、Linux 的源码与打包脚本，但尚未在相应原生系统上验证构建。Android 尚未实现；DownloadEngine 接口为后续引擎适配提供边界。
+应用会显示标题、缩略图和可用画质。如果网站提供文件大小，也会显示下载大小。分开的音频和视频会合并为一个文件。兼容的画质可以选择 WebM 格式。
 
-开发需要 Flutter 和目标系统的桌面构建工具，已测试环境为 Flutter 3.41.2 / Dart 3.11。完整安装包的用户不需要手动安装 Python、FFmpeg 或 Deno。
+视频保存在你的设备上，无需 Vidora 账号。应用直接连接视频网站进行检查和下载。如果网站需要登录，可以选择本地 cookies.txt 文件。网站变更、失效链接、私密内容、地区限制和 DRM 都可能影响下载。使用 Cookie 也不能保证每个链接都能下载。
 
-```powershell
-flutter pub get
-$env:LOCAL_VIDEO_TOOLS = (Resolve-Path runtime/windows).Path
-flutter run -d windows
-```
+## 安装
 
-```sh
-flutter analyze
-flutter test
-```
+版本 **0.1.10**。本地安装包保存在 `dist/`：
 
-参阅[构建与打包指南](docs/BUILD.md)。本地开发目录包含 Windows 引擎，但可执行文件不提交到 Git；首次克隆后需要准备运行引擎。本地安装包位于 dist，该目录也不提交到 Git。[贡献指南](CONTRIBUTING.md)与[安全说明](SECURITY.md)。
+- **Apple Silicon Mac：** 打开 DMG，将 Vidora 拖入 Applications。
+- **Linux x64：** 在 Ubuntu 或 Debian 上安装 DEB，或解压便携版本。
+- **Windows x64：** 将构建包复制到 Windows，生成 EXE 安装程序和便携 ZIP。构建包包含源代码和下载工具。
 
-## 支持开发
+完整应用包已包含下载工具。从 Git 克隆源代码时，需要先准备这些工具。详情请参阅[构建指南](docs/BUILD.md)和[测试记录](docs/VALIDATION.md)。目前没有 Android 版本。
 
-如果 Vidora 对您有帮助，欢迎支持后续开发、问题修复和更新。支持完全自愿，所有功能仍然免费。
+## 关于
 
-[支持 Vidora — 收款地址和二维码](docs/SUPPORT.md#中文)。您也可以通过应用中的爱心按钮打开此页面。
+开发者：**Zolfaghari**。如果 Vidora 对你有帮助，欢迎通过应用中的爱心按钮或[支持页面](docs/SUPPORT.md)支持后续更新。支持完全自愿，所有功能免费。
 
-## 限制与隐私
-站点支持采用尽力而为原则，不保证所有站点与链接均可下载。DRM、登录限制、反机器人检查、地区限制和网站变化可能导致失败；Cookie 不能保证成功。队列不会在重启后保留。更换封装格式不会转换编码；遇到兼容问题可尝试 MKV。断电或强制结束程序可能留下临时文件。Windows 安装包尚未进行 Authenticode 签名。请勿在问题报告中提交真实 Cookie 或账号秘密。
-
-## 许可证
-Vidora 自身源码采用 [MIT](LICENSE)，依赖组件保留各自的许可证。本地 FFmpeg 为 GPLv3 构建；公开分发相关二进制安装包前，需要提供完整对应源码、构建信息及所链接库的源码。当前记录尚未完成这一要求。[第三方许可证说明](THIRD_PARTY_NOTICES.md)。
+源代码采用 [MIT 许可证](LICENSE)。工具和字体保留各自许可证，详见[第三方声明](THIRD_PARTY_NOTICES.md)。

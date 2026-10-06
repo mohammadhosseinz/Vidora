@@ -19,7 +19,8 @@ Future<void> main() async {
 }
 
 class LocalVideoApp extends StatefulWidget {
-  const LocalVideoApp({super.key});
+  final DesktopEngine? engine;
+  const LocalVideoApp({super.key, this.engine});
   @override
   State<LocalVideoApp> createState() => _AppState();
 }
@@ -48,6 +49,7 @@ class _AppState extends State<LocalVideoApp> {
       useMaterial3: true,
     ),
     home: Home(
+      engine: widget.engine,
       language: language,
       onLanguage: (v) => setState(() => language = v),
     ),
@@ -67,17 +69,23 @@ class Job {
 }
 
 class Home extends StatefulWidget {
+  final DesktopEngine? engine;
   final String language;
   final ValueChanged<String> onLanguage;
-  const Home({super.key, required this.language, required this.onLanguage});
+  const Home({
+    super.key,
+    required this.language,
+    required this.onLanguage,
+    this.engine,
+  });
   @override
   State<Home> createState() => _HomeState();
 }
 
 class _HomeState extends State<Home> with WindowListener {
-  final engine = DesktopEngine(
-    toolsDirectory: Platform.environment['LOCAL_VIDEO_TOOLS'],
-  );
+  late final engine =
+      widget.engine ??
+      DesktopEngine(toolsDirectory: Platform.environment['LOCAL_VIDEO_TOOLS']);
   final input = TextEditingController();
   Timer? previewTimer;
   SupportConfig supportConfig = SupportConfig();
@@ -114,7 +122,8 @@ class _HomeState extends State<Home> with WindowListener {
   @override
   Future<void> onWindowClose() async {
     if (closing) return;
-    closing = true;
+    setState(() => closing = true);
+    previewTimer?.cancel();
     for (final j
         in jobs
             .where((j) => ['waiting', 'running'].contains(j.state))
@@ -132,6 +141,7 @@ class _HomeState extends State<Home> with WindowListener {
 
   void linkChanged(String value) {
     previewTimer?.cancel();
+    if (closing) return;
     setState(() {
       video = null;
       quality = null;
@@ -160,7 +170,7 @@ class _HomeState extends State<Home> with WindowListener {
   }
 
   Future<void> inspect() async {
-    if (checking) return;
+    if (checking || closing) return;
     previewTimer?.cancel();
     final inspectedLink = input.text.trim();
     setState(() {
@@ -180,6 +190,7 @@ class _HomeState extends State<Home> with WindowListener {
         setState(() {
           video = v;
           quality = v.qualities.first;
+          if (!quality!.containers.contains(format)) format = 'mkv';
         });
     } on EngineException catch (e) {
       if (mounted && input.text.trim() == inspectedLink)
@@ -196,9 +207,9 @@ class _HomeState extends State<Home> with WindowListener {
   }
 
   Future<void> pump() async {
-    if (working) return;
+    if (working || closing) return;
     working = true;
-    while (jobs.any((j) => j.state == 'waiting')) {
+    while (!closing && jobs.any((j) => j.state == 'waiting')) {
       final j = jobs.firstWhere((j) => j.state == 'waiting');
       setState(() => j.state = 'running');
       try {
@@ -416,6 +427,7 @@ class _HomeState extends State<Home> with WindowListener {
             icon: const Icon(Icons.favorite_outline),
           ),
           DropdownButton<String>(
+            key: const ValueKey('language-selector'),
             value: widget.language,
             items: languages.entries
                 .map(
@@ -594,15 +606,24 @@ class _HomeState extends State<Home> with WindowListener {
                         ),
                       )
                       .toList(),
-                  onChanged: (q) => setState(() => quality = q),
+                  onChanged: (q) => setState(() {
+                    quality = q;
+                    if (!q!.containers.contains(format)) format = 'mkv';
+                  }),
                 ),
+                if (quality != null)
+                  Text(
+                    sizeLabel(quality!),
+                    key: const ValueKey('download-size'),
+                  ),
                 Text(t('sizeHint')),
-                if (quality?.audio == false) Text(t('merge')),
+                if (quality?.needsMerge == true) Text(t('merge')),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
+                  key: ValueKey((quality, format)),
                   initialValue: format,
                   decoration: InputDecoration(labelText: t('format')),
-                  items: ['mkv', 'mp4', 'webm']
+                  items: (quality?.containers ?? ['mkv', 'mp4'])
                       .map(
                         (s) => DropdownMenuItem(
                           value: s,
@@ -622,7 +643,7 @@ class _HomeState extends State<Home> with WindowListener {
                   label: Text(folder ?? t('folder')),
                 ),
                 FilledButton.icon(
-                  onPressed: folder == null || quality == null
+                  onPressed: closing || folder == null || quality == null
                       ? null
                       : () {
                           setState(

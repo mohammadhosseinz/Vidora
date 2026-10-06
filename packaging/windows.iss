@@ -1,14 +1,17 @@
+#ifndef AppVersion
+  #define AppVersion "0.1.10"
+#endif
 [Setup]
 AppId={{F3725135-4137-493D-82EC-A450B722EFB6}
 AppName=Vidora
-AppVersion=0.1.8
+AppVersion={#AppVersion}
 DefaultDirName={localappdata}\Programs\Vidora
 DefaultGroupName=Vidora
 PrivilegesRequired=lowest
 ArchitecturesAllowed=x64compatible
 ArchitecturesInstallIn64BitMode=x64compatible
 OutputDir=..\dist
-OutputBaseFilename=Vidora-Setup-Windows-x64-0.1.8
+OutputBaseFilename=Vidora-Setup-Windows-x64-{#AppVersion}
 Compression=lzma2
 SolidCompression=yes
 UninstallDisplayIcon={app}\local_video.exe
