@@ -16,40 +16,43 @@ Future<void> main() async {
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
   await windowManager.setTitle('Vidora');
-  runApp(const LocalVideoApp());
+
+  final initialLanguage = await LocalVideoApp.loadStoredLanguage();
+  runApp(LocalVideoApp(initialLanguage: initialLanguage));
 }
 
 class LocalVideoApp extends StatefulWidget {
+  static const String languageKey = 'selected_language';
+  static const List<String> supportedLanguageCodes = ['fa', 'ar', 'en', 'zh'];
+
   final DesktopEngine? engine;
-  const LocalVideoApp({super.key, this.engine});
+  final String initialLanguage;
+
+  const LocalVideoApp({
+    super.key,
+    this.engine,
+    this.initialLanguage = 'en',
+  });
+
+  static Future<String> loadStoredLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(languageKey);
+    if (saved != null && supportedLanguageCodes.contains(saved)) {
+      return saved;
+    }
+    return 'en';
+  }
+
   @override
   State<LocalVideoApp> createState() => _AppState();
 }
 
 class _AppState extends State<LocalVideoApp> {
-  static const String _languageKey = 'selected_language';
-  static const List<String> _supportedLanguages = ['fa', 'ar', 'en', 'zh'];
-
-  String language = 'en';
-
-  @override
-  void initState() {
-    super.initState();
-    _loadLanguage();
-  }
-
-  Future<void> _loadLanguage() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_languageKey);
-    if (!mounted) return;
-    if (saved != null && _supportedLanguages.contains(saved)) {
-      setState(() => language = saved);
-    }
-  }
+  late String language = widget.initialLanguage;
 
   Future<void> _saveLanguage(String nextLanguage) async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_languageKey, nextLanguage);
+    await prefs.setString(LocalVideoApp.languageKey, nextLanguage);
   }
 
   void _onLanguageChanged(String nextLanguage) {
