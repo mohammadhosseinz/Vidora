@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:file_selector/file_selector.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'engine.dart';
 import 'strings.dart';
 import 'support.dart';
@@ -26,7 +27,36 @@ class LocalVideoApp extends StatefulWidget {
 }
 
 class _AppState extends State<LocalVideoApp> {
+  static const String _languageKey = 'selected_language';
+  static const List<String> _supportedLanguages = ['fa', 'ar', 'en', 'zh'];
+
   String language = 'en';
+
+  @override
+  void initState() {
+    super.initState();
+    _loadLanguage();
+  }
+
+  Future<void> _loadLanguage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final saved = prefs.getString(_languageKey);
+    if (!mounted) return;
+    if (saved != null && _supportedLanguages.contains(saved)) {
+      setState(() => language = saved);
+    }
+  }
+
+  Future<void> _saveLanguage(String nextLanguage) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(_languageKey, nextLanguage);
+  }
+
+  void _onLanguageChanged(String nextLanguage) {
+    setState(() => language = nextLanguage);
+    unawaited(_saveLanguage(nextLanguage));
+  }
+
   @override
   Widget build(BuildContext context) => MaterialApp(
     debugShowCheckedModeBanner: false,
@@ -51,7 +81,7 @@ class _AppState extends State<LocalVideoApp> {
     home: Home(
       engine: widget.engine,
       language: language,
-      onLanguage: (v) => setState(() => language = v),
+      onLanguage: _onLanguageChanged,
     ),
   );
 }
