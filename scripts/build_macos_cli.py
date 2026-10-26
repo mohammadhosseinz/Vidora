@@ -97,10 +97,15 @@ def main():
               '-framework', 'UniformTypeIdentifiers']
     plugin_links = []
     for plugin in plugins:
-        plugin_dir = Path(plugin['path']) / 'macos'
+        platform_dir = 'darwin' if plugin.get('shared_darwin_source') else 'macos'
+        plugin_dir = Path(plugin['path']) / platform_dir
         swift = [str(path) for path in plugin_dir.rglob('*.swift')
-                 if path.name != 'Package.swift' and 'Tests' not in path.parts]
+                 if path.name != 'Package.swift' and not any(
+                     part.lower().endswith('tests')
+                     for part in path.relative_to(plugin_dir).parts)]
         name = plugin['name']
+        if not swift:
+            raise ValueError(f'No Swift sources found for native plugin {name} in {plugin_dir}')
         framework = frameworks / f'{name}.framework'
         modules = framework / 'Modules' / f'{name}.swiftmodule'
         modules.mkdir(parents=True)

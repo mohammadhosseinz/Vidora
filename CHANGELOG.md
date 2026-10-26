@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0 — 2026-10-25
+
+- Add site profiles for Aparat, YouTube, Instagram, X/Twitter, TikTok, Facebook and Vimeo, with immutable settings per inspected link.
+- Separate expired media, geographical restrictions, login/cookie requirements, anti-bot checks, DRM, rate limits, unavailable formats and uncertain HTTP 403 errors.
+- Retry transient failures, try configured connection alternatives and supported browser impersonation, and re-inspect expired or missing formats. Lower-quality fallback requires explicit opt-in.
+- Persist the queue, inspect multiple links independently, preserve partial downloads across failures/restarts, and add Pause/Resume with stable job identities. Restored jobs wait for user action.
+- Retain bounded, redacted yt-dlp diagnostics with copy/export controls.
+- Expose custom headers, User-Agent, Referer, proxy, format selector and extractor behavior. Add offline engine-age warnings and an explicit latest-release check.
+- Add a persisted light/dark theme and incorporate the GitHub language-persistence branch, including startup error handling, serialized writes and regression tests.
+
+
 ## 0.1.10 — 2026-10-06
 
 - Read Aparat's current public player API and offer its MP4 and HLS qualities after the site's embed-page change.

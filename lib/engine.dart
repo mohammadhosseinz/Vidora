@@ -4,9 +4,20 @@ import 'dart:io';
 import 'dart:typed_data';
 import 'package:path/path.dart' as p;
 import 'cookies.dart';
+import 'diagnostics.dart';
+import 'site_profiles.dart';
 
 enum Failure {
   invalid,
+  invalidOptions,
+  expired,
+  geoBlocked,
+  loginRequired,
+  cookiesRequired,
+  drm,
+  rateLimited,
+  formatUnavailable,
+  forbidden,
   incompatibleFormat,
   unsupported,
   network,
@@ -47,16 +58,19 @@ class ConnectionOptions {
   }
 
   List<ConnectionOptions> get attempts => mode == ConnectionMode.automatic
-      ? const [
-          ConnectionOptions(mode: ConnectionMode.system),
+      ? [
+          const ConnectionOptions(mode: ConnectionMode.system),
           ConnectionOptions(mode: ConnectionMode.direct),
+          if (proxy.isNotEmpty)
+            ConnectionOptions(mode: ConnectionMode.custom, proxy: proxy),
         ]
       : [this];
 }
 
 class EngineException implements Exception {
   final Failure reason;
-  EngineException(this.reason);
+  final String? logId;
+  EngineException(this.reason, {this.logId});
 }
 
 void validateLink(String link) {
@@ -65,47 +79,91 @@ void validateLink(String link) {
       !['http', 'https'].contains(uri.scheme) ||
       uri.host.isEmpty ||
       uri.userInfo.isNotEmpty ||
-      link.contains('\n')) {
+      link.length > 16384 ||
+      RegExp(r'[\x00-\x20\x7f]').hasMatch(link)) {
     throw EngineException(Failure.invalid);
   }
 }
 
 Failure classify(String message) {
   final s = message.toLowerCase();
-  if ([
-    'unable to connect to proxy',
-    'proxyerror',
-    'proxy connection',
-  ].any(s.contains))
+  bool has(List<String> markers) => markers.any(s.contains);
+  // Specific causes must precede broad messages such as "unable to download".
+  if (has([
+    'drm protected',
+    'drm-protected',
+    'digital rights management',
+    'has drm',
+  ]))
+    return Failure.drm;
+  if (has(['unable to connect to proxy', 'proxyerror', 'proxy connection']))
     return Failure.proxy;
-  if ([
+  if (has([
     'not a bot',
+    'captcha',
+    'cloudflare',
     'confirm you’re not a bot',
-    'confirm you\'re not a bot',
-  ].any(s.contains))
+    "confirm you're not a bot",
+  ]))
     return Failure.bot;
-  if ([
+  if (has(['http error 429', 'too many requests', 'rate limit']))
+    return Failure.rateLimited;
+  if (has([
+    'not available in your country',
+    'geo-restricted',
+    'geo restricted',
+    'geoblocked',
+    'geographic restriction',
+    'not available from your location',
+  ]))
+    return Failure.geoBlocked;
+  if (has([
+    'expired url',
+    'url has expired',
+    'link has expired',
+    'signature has expired',
+    'token has expired',
+  ]))
+    return Failure.expired;
+  if (has([
+    'cookies are required',
+    'cookies required',
+    'use --cookies',
+    'pass --cookies',
+    'cookies have expired',
+    'cookies are no longer valid',
+  ]))
+    return Failure.cookiesRequired;
+  if (has([
+    'sign in',
+    'log in',
+    'login required',
+    'logged-in',
+    'http error 401',
+    'members-only',
+    'age-restricted',
+  ]))
+    return Failure.loginRequired;
+  if (has(['requested format is not available', 'no video formats found']))
+    return Failure.formatUnavailable;
+  if (s.contains('unsupported url')) return Failure.unsupported;
+  if (has([
     'private video',
     'video unavailable',
     'video is unavailable',
-    'sign in',
-    'members-only',
-    'age-restricted',
-    'logged-in',
-    'login required',
     'protected by a password',
-    'http error 401',
-    'not available in your country',
-  ].any(s.contains))
+    'http error 404',
+    'http error 410',
+  ]))
     return Failure.restricted;
-  if (s.contains('unsupported url')) return Failure.unsupported;
-  if ([
+  if (s.contains('http error 403')) return Failure.forbidden;
+  if (has([
     'timed out',
     'unable to download',
     'connection',
     'name resolution',
     'network',
-  ].any(s.contains))
+  ]))
     return Failure.network;
   return Failure.extraction;
 }
@@ -238,6 +296,10 @@ class Video {
   final List<Quality> qualities;
   final ConnectionOptions connection;
   final CookieSession? cookies;
+  final DownloadOptions options;
+  final bool impersonate;
+  final bool requiresSession;
+  final ConnectionOptions? fallbackConnection;
   Video(
     this.url,
     this.title,
@@ -246,13 +308,28 @@ class Video {
     this.connection = const ConnectionOptions(),
     this.cookies,
     this.thumbnailBytes,
-  });
+    DownloadOptions? options,
+    this.impersonate = false,
+    this.requiresSession = false,
+    this.fallbackConnection,
+  }) : options = options ?? DownloadOptions();
 }
 
 class Progress {
   final double fraction;
   final String speed;
-  Progress(this.fraction, this.speed);
+  final String phase;
+  final int attempt;
+  final int? height;
+  final Quality? selectedQuality;
+  Progress(
+    this.fraction,
+    this.speed, {
+    this.phase = 'running',
+    this.attempt = 1,
+    this.height,
+    this.selectedQuality,
+  });
 }
 
 abstract class DownloadEngine {
@@ -271,14 +348,22 @@ abstract class DownloadEngine {
 
 class DesktopEngine implements DownloadEngine {
   String? cookieFile;
+  DownloadOptions options = DownloadOptions();
+  final Diagnostics diagnostics;
+  final Set<String> _paused = {};
+  bool? _impersonationAvailable;
+  final _probes = <Process>{};
   ConnectionOptions connection = const ConnectionOptions();
   final String tools;
   final Map<String, Process> _running = {};
   final Set<String> _cancelled = {};
   Process? _inspection;
+  String? _inspectionId;
   bool _closing = false;
-  DesktopEngine({String? toolsDirectory})
-    : tools =
+  Future<void> _inspections = Future.value();
+  DesktopEngine({String? toolsDirectory, Diagnostics? diagnostics})
+    : diagnostics = diagnostics ?? Diagnostics(),
+      tools =
           toolsDirectory ??
           p.join(p.dirname(Platform.resolvedExecutable), 'tools');
   String exe(String name) =>
@@ -289,13 +374,17 @@ class DesktopEngine implements DownloadEngine {
     }
   }
 
-  List<String> get common => [
+  List<String> get common => commonFor(options);
+  List<String> commonFor(DownloadOptions selected) => [
     '--ignore-config',
     '--no-plugin-dirs',
-    if (Directory(p.join(tools, 'plugins')).existsSync()) ...[
+    if (selected.extractor == ExtractorMode.automatic &&
+        Directory(p.join(tools, 'plugins')).existsSync()) ...[
       '--plugin-dirs',
       p.join(tools, 'plugins'),
     ],
+    '--no-color',
+    '--verbose',
     '--no-playlist',
     '--no-update',
     '--no-remote-components',
@@ -313,36 +402,193 @@ class DesktopEngine implements DownloadEngine {
     '--ffmpeg-location',
     tools,
   ];
+  Future<ProcessResult> _probe(List<String> arguments) async {
+    if (_closing) throw EngineException(Failure.tools);
+    final process = await Process.start(
+      exe('yt-dlp'),
+      arguments,
+      runInShell: false,
+      environment: const {'PYTHONDONTWRITEBYTECODE': '1'},
+    );
+    _probes.add(process);
+    final output = process.stdout
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .join();
+    final error = process.stderr
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .join();
+    try {
+      if (_closing) await _killTree(process);
+      final code = await process.exitCode.timeout(const Duration(seconds: 30));
+      return ProcessResult(process.pid, code, await output, await error);
+    } on TimeoutException {
+      await _killTree(process);
+      throw EngineException(Failure.tools);
+    } finally {
+      _probes.remove(process);
+    }
+  }
+
+  Future<String> runtimeVersion() async {
+    final result = await _probe([
+      '--ignore-config',
+      '--no-plugin-dirs',
+      '--no-update',
+      '--version',
+    ]);
+    if (result.exitCode != 0) throw EngineException(Failure.tools);
+    return '${result.stdout}'.trim();
+  }
+
+  Future<bool> supportsImpersonation() async {
+    if (_impersonationAvailable != null) return _impersonationAvailable!;
+    try {
+      final result = await _probe([
+        '--ignore-config',
+        '--no-plugin-dirs',
+        '--no-update',
+        '--list-impersonate-targets',
+      ]);
+      _impersonationAvailable =
+          result.exitCode == 0 &&
+          RegExp(
+            r'^\s*(?:chrome|safari|edge|firefox)[-\s]',
+            caseSensitive: false,
+            multiLine: true,
+          ).hasMatch('${result.stdout}');
+    } catch (_) {
+      return false;
+    }
+    return _impersonationAvailable!;
+  }
+
   @override
   Future<Video> inspect(String url) async {
-    validateLink(url);
-    CookieSession? session;
     try {
-      if (cookieFile != null)
-        session = await CookieSession.load(cookieFile!, url);
-    } on CookieException catch (e) {
-      throw EngineException(
-        e.reason == CookieFailure.invalid
-            ? Failure.invalidCookies
-            : Failure.noMatchingCookies,
+      validateLink(url);
+      return await inspectWith(
+        url,
+        connection,
+        options,
+        cookieFile: cookieFile,
       );
+    } on ProcessException {
+      throw EngineException(Failure.tools, logId: 'inspection');
+    } on EngineException catch (e) {
+      diagnostics.add('inspection', 'Inspection failed: ${e.reason.name}');
+      throw EngineException(e.reason, logId: 'inspection');
+    } finally {
+      await diagnostics.flush('inspection');
     }
-    final options = connection;
-    final attempts = options.attempts;
-    for (var index = 0; index < attempts.length; index++) {
+  }
+
+  Future<Video> inspectWith(
+    String url,
+    ConnectionOptions selected,
+    DownloadOptions settings, {
+    String? cookieFile,
+    CookieSession? session,
+    String logId = 'inspection',
+    bool impersonate = false,
+  }) {
+    final completer = Completer<Video>();
+    _inspections = _inspections.then((_) async {
       try {
-        return await _inspect(
-          url,
-          attempts[index],
-          session: session,
-          timeout: options.mode == ConnectionMode.automatic
-              ? Duration(seconds: index == 0 ? 30 : 60)
-              : const Duration(seconds: 90),
+        if (_closing) throw EngineException(Failure.extraction);
+        completer.complete(
+          await _inspectWith(
+            url,
+            selected,
+            settings,
+            cookieFile: cookieFile,
+            session: session,
+            logId: logId,
+            impersonate: impersonate,
+          ),
         );
-      } on EngineException catch (e) {
-        if (index == attempts.length - 1 ||
-            ![Failure.proxy, Failure.network].contains(e.reason))
-          rethrow;
+      } catch (error, stack) {
+        completer.completeError(error, stack);
+      }
+    });
+    return completer.future;
+  }
+
+  Future<Video> _inspectWith(
+    String url,
+    ConnectionOptions selected,
+    DownloadOptions settings, {
+    String? cookieFile,
+    CookieSession? session,
+    String logId = 'inspection',
+    bool impersonate = false,
+  }) async {
+    validateLink(url);
+    try {
+      settings.validate();
+    } on FormatException {
+      throw EngineException(Failure.invalidOptions);
+    }
+    diagnostics.protect([
+      ...settings.headers.values,
+      settings.userAgent,
+      settings.referer,
+    ]);
+    if (cookieFile != null) {
+      try {
+        session = await CookieSession.load(cookieFile, url);
+      } on CookieException catch (e) {
+        throw EngineException(
+          e.reason == CookieFailure.invalid
+              ? Failure.invalidCookies
+              : Failure.noMatchingCookies,
+        );
+      }
+    }
+    final sessionBound = session != null || settings.hasSessionHeaders;
+    final attempts = sessionBound
+        ? [selected.attempts.first]
+        : selected.attempts;
+    for (var index = 0; index < attempts.length; index++) {
+      var useImpersonation = impersonate;
+      while (true) {
+        if (_closing || _paused.contains(logId) || _cancelled.contains(logId))
+          throw EngineException(Failure.extraction);
+        diagnostics.add(
+          logId,
+          'Inspect ${SiteProfile.forUrl(url).id}: ${attempts[index].mode.name}, impersonation=$useImpersonation',
+        );
+        try {
+          final result = await _inspect(
+            url,
+            attempts[index],
+            settings: settings,
+            session: session,
+            logId: logId,
+            impersonate: useImpersonation,
+            timeout: Duration(
+              seconds: selected.mode == ConnectionMode.automatic
+                  ? (index == 0 ? 30 : 60)
+                  : 90,
+            ),
+          );
+          return _copyVideo(result, fallbackConnection: selected);
+        } on EngineException catch (e) {
+          if (_closing || _paused.contains(logId) || _cancelled.contains(logId))
+            rethrow;
+          if (!sessionBound &&
+              !useImpersonation &&
+              settings.allowImpersonation &&
+              SiteProfile.forUrl(url).impersonation &&
+              [Failure.bot, Failure.forbidden].contains(e.reason) &&
+              await supportsImpersonation()) {
+            useImpersonation = true;
+            continue;
+          }
+          if (index == attempts.length - 1 ||
+              ![Failure.proxy, Failure.network].contains(e.reason))
+            rethrow;
+          break;
+        }
       }
     }
     throw EngineException(Failure.network);
@@ -352,6 +598,9 @@ class DesktopEngine implements DownloadEngine {
     String url,
     ConnectionOptions selectedConnection, {
     required Duration timeout,
+    required DownloadOptions settings,
+    required String logId,
+    bool impersonate = false,
     CookieSession? session,
   }) async {
     CookieLease? lease;
@@ -363,6 +612,9 @@ class DesktopEngine implements DownloadEngine {
         timeout: timeout,
         session: session,
         cookieArgs: lease?.arguments ?? [],
+        settings: settings,
+        logId: logId,
+        impersonate: impersonate,
       );
       if (lease == null) return video;
       final refreshed = await CookieSession.load(lease.path, url);
@@ -374,12 +626,16 @@ class DesktopEngine implements DownloadEngine {
         connection: video.connection,
         cookies: refreshed,
         thumbnailBytes: video.thumbnailBytes,
+        options: video.options,
+        impersonate: video.impersonate,
+        requiresSession: true,
       );
     } on CookieException {
       throw EngineException(Failure.invalidCookies);
     } on FileSystemException {
       throw EngineException(Failure.storage);
     } finally {
+      _inspectionId = null;
       await lease?.dispose();
     }
   }
@@ -389,6 +645,9 @@ class DesktopEngine implements DownloadEngine {
     ConnectionOptions selectedConnection, {
     required Duration timeout,
     required List<String> cookieArgs,
+    required DownloadOptions settings,
+    required String logId,
+    bool impersonate = false,
     CookieSession? session,
   }) async {
     final connectionArgs = selectedConnection.arguments();
@@ -397,7 +656,9 @@ class DesktopEngine implements DownloadEngine {
     final proc = await Process.start(
       exe('yt-dlp'),
       [
-        ...common,
+        ...commonFor(settings),
+        ...settings.arguments(SiteProfile.forUrl(url)),
+        if (impersonate) ...['--impersonate', 'chrome'],
         ...connectionArgs,
         ...cookieArgs,
         '--dump-single-json',
@@ -413,8 +674,11 @@ class DesktopEngine implements DownloadEngine {
       environment: const {'PYTHONDONTWRITEBYTECODE': '1'},
     );
     _inspection = proc;
-    final out = proc.stdout.transform(utf8.decoder).join();
-    final err = proc.stderr.transform(utf8.decoder).join();
+    _inspectionId = logId;
+    final out = proc.stdout
+        .transform(const Utf8Decoder(allowMalformed: true))
+        .join();
+    final err = _captureErrors(proc, logId);
     if (_closing) await _killTree(proc);
     int code;
     try {
@@ -430,11 +694,25 @@ class DesktopEngine implements DownloadEngine {
     try {
       final data = jsonDecode(await out) as Map<String, dynamic>;
       final q = parseQualities(data);
-      if (q.isEmpty) throw EngineException(Failure.extraction);
+      if (q.isEmpty) {
+        final formats = data['formats'] as List? ?? [];
+        throw EngineException(
+          formats.any((f) => f['has_drm'] == true)
+              ? Failure.drm
+              : Failure.formatUnavailable,
+        );
+      }
       final thumb = data['thumbnail'] as String?;
       final image = thumb == null
           ? null
-          : await _loadThumbnail(data, connectionArgs, cookieArgs);
+          : await _loadThumbnail(
+              data,
+              connectionArgs,
+              cookieArgs,
+              settings,
+              impersonate,
+              logId,
+            );
       return Video(
         url,
         data['title'] as String? ?? 'video',
@@ -443,6 +721,9 @@ class DesktopEngine implements DownloadEngine {
         connection: selectedConnection,
         cookies: session,
         thumbnailBytes: image,
+        options: settings,
+        impersonate: impersonate,
+        requiresSession: session != null,
       );
     } on EngineException {
       rethrow;
@@ -455,6 +736,9 @@ class DesktopEngine implements DownloadEngine {
     Map<String, dynamic> data,
     List<String> connectionArgs,
     List<String> cookieArgs,
+    DownloadOptions settings,
+    bool impersonate,
+    String logId,
   ) async {
     final dir = await Directory.systemTemp.createTemp('local-video-preview-');
     Process? process;
@@ -467,7 +751,11 @@ class DesktopEngine implements DownloadEngine {
       process = await Process.start(
         exe('yt-dlp'),
         [
-          ...common,
+          ...commonFor(settings),
+          ...settings.arguments(
+            SiteProfile.forUrl(data['webpage_url'] as String? ?? ''),
+          ),
+          if (impersonate) ...['--impersonate', 'chrome'],
           ...connectionArgs,
           ...cookieArgs,
           '--socket-timeout',
@@ -486,11 +774,14 @@ class DesktopEngine implements DownloadEngine {
       );
       _inspection = process;
       final stdoutDone = process.stdout.drain<void>();
-      final stderrDone = process.stderr.drain<void>();
+      final stderrDone = _captureErrors(process, logId);
       if (_closing) await _killTree(process);
-      final code = await process.exitCode.timeout(const Duration(seconds: 12));
+      final code = await process.exitCode.timeout(const Duration(seconds: 30));
       await Future.wait([stdoutDone, stderrDone]);
-      if (code != 0) return null;
+      if (code != 0) {
+        diagnostics.add(logId, 'Thumbnail exit code: $code');
+        return null;
+      }
       for (final file in dir.listSync().whereType<File>()) {
         if (p.basename(file.path).startsWith('preview.') &&
             [
@@ -502,13 +793,31 @@ class DesktopEngine implements DownloadEngine {
             await file.length() <= 10 * 1024 * 1024)
           return await file.readAsBytes();
       }
-    } catch (_) {
+    } catch (error) {
+      diagnostics.add(logId, 'Thumbnail failed: $error');
       if (process != null) await _killTree(process);
     } finally {
       _inspection = null;
       await dir.delete(recursive: true);
     }
     return null;
+  }
+
+  Future<String> _captureErrors(Process process, String id) async {
+    final tail = StringBuffer();
+    await for (final line
+        in process.stderr
+            .transform(const Utf8Decoder(allowMalformed: true))
+            .transform(const LineSplitter())) {
+      diagnostics.add(id, line);
+      tail.writeln(line);
+      if (tail.length > 65536) {
+        final last = tail.toString();
+        tail.clear();
+        tail.write(last.substring(last.length - 32768));
+      }
+    }
+    return tail.toString();
   }
 
   @override
@@ -520,7 +829,217 @@ class DesktopEngine implements DownloadEngine {
     String id,
     void Function(Progress) progress,
   ) async {
+    diagnostics.protect([
+      ...video.options.headers.values,
+      video.options.userAgent,
+      video.options.referer,
+    ]);
+    var current = video.connection.mode == ConnectionMode.automatic
+        ? _copyVideo(video, connection: video.connection.attempts.first)
+        : video;
+    var selectedQuality = quality;
+    var impersonationTried = video.impersonate;
+    var refreshed = false;
+    var connectionIndex = 0;
+    final initial = video.connection.mode == ConnectionMode.automatic
+        ? video.connection.attempts.first
+        : video.connection;
+    final connections = <ConnectionOptions>[
+      initial,
+      if (video.cookies == null && !video.options.hasSessionHeaders)
+        ...(video.fallbackConnection ?? video.connection).attempts.where(
+          (c) => c.mode != initial.mode || c.proxy != initial.proxy,
+        ),
+    ];
+    _paused.remove(id);
+    try {
+      for (var attempt = 1; attempt <= 4; attempt++) {
+        if (_closing || _paused.contains(id) || _cancelled.contains(id))
+          throw EngineException(Failure.extraction);
+        diagnostics.add(
+          id,
+          'Download attempt $attempt: ${SiteProfile.forUrl(video.url).id}, ${current.connection.mode.name}, ${selectedQuality.height}p',
+        );
+        try {
+          progress(
+            Progress(
+              0,
+              '',
+              attempt: attempt,
+              height: selectedQuality.height,
+              selectedQuality: selectedQuality,
+            ),
+          );
+          return await _downloadOnce(
+            current,
+            selectedQuality,
+            container,
+            folder,
+            id,
+            (p) => progress(
+              Progress(
+                p.fraction,
+                p.speed,
+                attempt: attempt,
+                height: selectedQuality.height,
+                selectedQuality: selectedQuality,
+              ),
+            ),
+          );
+        } on EngineException catch (e) {
+          diagnostics.add(id, 'Attempt failed: ${e.reason.name}');
+          if (attempt == 4 ||
+              _closing ||
+              _cancelled.contains(id) ||
+              _paused.contains(id))
+            rethrow;
+          if ([Failure.network, Failure.proxy].contains(e.reason)) {
+            if (connectionIndex + 1 < connections.length) {
+              connectionIndex++;
+              current = _copyVideo(
+                current,
+                connection: connections[connectionIndex],
+              );
+            }
+          } else if ([Failure.bot, Failure.forbidden].contains(e.reason) &&
+              !impersonationTried &&
+              video.cookies == null &&
+              !video.options.hasSessionHeaders &&
+              video.options.allowImpersonation &&
+              SiteProfile.forUrl(video.url).impersonation &&
+              await supportsImpersonation()) {
+            impersonationTried = true;
+            current = _copyVideo(current, impersonate: true);
+          } else if ([
+                Failure.expired,
+                Failure.formatUnavailable,
+              ].contains(e.reason) &&
+              !refreshed) {
+            refreshed = true;
+            progress(Progress(0, '', phase: 'retrying', attempt: attempt + 1));
+            final newer = await inspectWith(
+              video.url,
+              current.connection,
+              video.options,
+              session: video.cookies,
+              logId: id,
+              impersonate: current.impersonate,
+            );
+            final same = newer.qualities.where(
+              (q) =>
+                  q.id == quality.id &&
+                  q.audioId == quality.audioId &&
+                  q.containers.contains(container),
+            );
+            if (same.isNotEmpty) {
+              selectedQuality = same.first;
+            } else {
+              if (!video.options.allowFormatFallback ||
+                  video.options.format.isNotEmpty)
+                rethrow;
+              final alternatives = newer.qualities.where(
+                (q) =>
+                    q.height <= quality.height &&
+                    q.containers.contains(container),
+              );
+              if (alternatives.isEmpty) rethrow;
+              selectedQuality = alternatives.first;
+              diagnostics.add(
+                id,
+                'Format fallback selected: ${selectedQuality.height}p',
+              );
+            }
+            current = newer;
+          } else {
+            rethrow;
+          }
+          progress(
+            Progress(
+              0,
+              '',
+              phase: 'retrying',
+              attempt: attempt + 1,
+              height: selectedQuality.height,
+              selectedQuality: selectedQuality,
+            ),
+          );
+          await Future<void>.delayed(Duration(milliseconds: 400 * attempt));
+        }
+      }
+      throw EngineException(Failure.extraction);
+    } on ProcessException {
+      throw EngineException(Failure.tools, logId: id);
+    } on FileSystemException {
+      throw EngineException(Failure.storage, logId: id);
+    } on EngineException catch (e) {
+      throw EngineException(e.reason, logId: id);
+    } finally {
+      _running.remove(id);
+      final cancelled = _cancelled.remove(id);
+      _paused.remove(id);
+      if (cancelled) await discardPartial(folder, id);
+      await diagnostics.flush(id);
+    }
+  }
+
+  Video _copyVideo(
+    Video video, {
+    ConnectionOptions? connection,
+    ConnectionOptions? fallbackConnection,
+    bool? impersonate,
+  }) => Video(
+    video.url,
+    video.title,
+    video.thumbnail,
+    video.qualities,
+    connection: connection ?? video.connection,
+    thumbnailBytes: video.thumbnailBytes,
+    cookies: video.cookies,
+    options: video.options,
+    impersonate: impersonate ?? video.impersonate,
+    requiresSession: video.requiresSession,
+    fallbackConnection: fallbackConnection ?? video.fallbackConnection,
+  );
+
+  void prepareRetry(String id) {
+    _paused.remove(id);
+    _cancelled.remove(id);
+  }
+
+  Future<void> pause(String id) async {
+    _paused.add(id);
+    final process = _running[id];
+    if (process != null) await _killTree(process);
+    if (_inspectionId == id && _inspection != null)
+      await _killTree(_inspection!);
+  }
+
+  Future<void> discardPartial(String folder, String id) async {
+    if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(id))
+      throw EngineException(Failure.invalid);
+    final dir = Directory(p.join(folder, '.local-video-$id'));
+    if (await FileSystemEntity.type(dir.path, followLinks: false) ==
+        FileSystemEntityType.directory) {
+      await dir.delete(recursive: true);
+    }
+  }
+
+  Future<String> _downloadOnce(
+    Video video,
+    Quality quality,
+    String container,
+    String folder,
+    String id,
+    void Function(Progress) progress,
+  ) async {
     validateLink(video.url);
+    if (!RegExp(r'^[a-zA-Z0-9_-]+$').hasMatch(id))
+      throw EngineException(Failure.invalid);
+    try {
+      video.options.validate();
+    } on FormatException {
+      throw EngineException(Failure.invalidOptions);
+    }
     final connectionArgs = video.connection.arguments();
     if (!['mp4', 'mkv', 'webm'].contains(container) ||
         !RegExp(r'^[a-zA-Z0-9_.-]+$').hasMatch(quality.id) ||
@@ -533,16 +1052,41 @@ class DesktopEngine implements DownloadEngine {
     if (_closing) throw EngineException(Failure.extraction);
     final destination = Directory(folder);
     if (!await destination.exists()) throw EngineException(Failure.storage);
-    final temp = await destination.createTemp('.local-video-');
+    final temp = Directory(p.join(destination.path, '.local-video-$id'));
+    if (await FileSystemEntity.type(temp.path, followLinks: false) ==
+        FileSystemEntityType.link)
+      throw EngineException(Failure.storage);
+    await temp.create();
+    if (!Platform.isWindows) await Process.run('chmod', ['700', temp.path]);
+    final marker = File(p.join(temp.path, 'job.json'));
+    final identity = jsonEncode([
+      video.url,
+      quality.selector,
+      container,
+      video.options.format,
+    ]);
+    if (await marker.exists() && await marker.readAsString() != identity) {
+      // A fallback can select different streams; never append to incompatible parts.
+      await temp.delete(recursive: true);
+      await temp.create();
+    }
+    await marker.writeAsString(identity, flush: true);
+    if (!Platform.isWindows) await Process.run('chmod', ['700', temp.path]);
+    var succeeded = false;
     String? result;
     CookieLease? cookieLease;
     try {
       cookieLease = await video.cookies?.stage();
-      if (_cancelled.remove(id)) throw EngineException(Failure.extraction);
+      if (_cancelled.contains(id) || _paused.contains(id) || _closing)
+        throw EngineException(Failure.extraction);
       final proc = await Process.start(
         exe('yt-dlp'),
         [
-          ...common,
+          ...commonFor(video.options),
+          ...video.options.arguments(SiteProfile.forUrl(video.url)),
+          if (video.impersonate) ...['--impersonate', 'chrome'],
+          '--continue',
+          '--part',
           ...connectionArgs,
           ...?cookieLease?.arguments,
           '--newline',
@@ -556,7 +1100,9 @@ class DesktopEngine implements DownloadEngine {
           '--windows-filenames',
           '--no-overwrites',
           '-f',
-          quality.selector,
+          video.options.format.isEmpty
+              ? quality.selector
+              : video.options.format,
           '--merge-output-format',
           container,
           '--remux-video',
@@ -573,12 +1119,14 @@ class DesktopEngine implements DownloadEngine {
         environment: const {'PYTHONDONTWRITEBYTECODE': '1'},
       );
       _running[id] = proc;
-      final stderr = proc.stderr.transform(utf8.decoder).join();
-      if (_closing || _cancelled.contains(id)) await cancel(id);
+      final stderr = _captureErrors(proc, id);
+      if (_closing || _cancelled.contains(id) || _paused.contains(id))
+        await _killTree(proc);
       await for (final line
           in proc.stdout
-              .transform(utf8.decoder)
+              .transform(const Utf8Decoder(allowMalformed: true))
               .transform(const LineSplitter())) {
+        diagnostics.add(id, line);
         if (line.startsWith('FILE:')) result = line.substring(5).trim();
         if (line.startsWith('PROGRESS:')) {
           final parts = line.substring(9).split('|');
@@ -595,7 +1143,8 @@ class DesktopEngine implements DownloadEngine {
       }
       final code = await proc.exitCode;
       final error = await stderr;
-      if (_cancelled.contains(id)) throw EngineException(Failure.extraction);
+      if (_cancelled.contains(id) || _paused.contains(id) || _closing)
+        throw EngineException(Failure.extraction);
       if (code != 0 || result == null) throw EngineException(classify(error));
       if (!p.isWithin(temp.absolute.path, p.absolute(result)))
         throw EngineException(Failure.storage);
@@ -606,6 +1155,7 @@ class DesktopEngine implements DownloadEngine {
       if (await File(finalPath).exists())
         throw EngineException(Failure.storage);
       await File(result).rename(finalPath);
+      succeeded = true;
       return finalPath;
     } on CookieException {
       throw EngineException(Failure.invalidCookies);
@@ -613,11 +1163,11 @@ class DesktopEngine implements DownloadEngine {
       throw EngineException(Failure.storage);
     } finally {
       _running.remove(id);
-      _cancelled.remove(id);
       try {
         await cookieLease?.dispose();
       } finally {
-        if (await temp.exists()) await temp.delete(recursive: true);
+        if ((succeeded || _cancelled.contains(id)) && await temp.exists())
+          await temp.delete(recursive: true);
       }
     }
   }
@@ -626,8 +1176,9 @@ class DesktopEngine implements DownloadEngine {
   Future<void> cancel(String id) async {
     _cancelled.add(id);
     final proc = _running[id];
-    if (proc == null) return;
-    await _killTree(proc);
+    if (proc != null) await _killTree(proc);
+    if (_inspectionId == id && _inspection != null)
+      await _killTree(_inspection!);
   }
 
   Future<void> _killTree(Process proc) async {
@@ -681,9 +1232,12 @@ class DesktopEngine implements DownloadEngine {
 
   Future<void> shutdown() async {
     _closing = true;
+    for (final process in _probes.toList()) {
+      await _killTree(process);
+    }
     if (_inspection != null) await _killTree(_inspection!);
     for (final id in _running.keys.toList()) {
-      await cancel(id);
+      await pause(id);
     }
   }
 

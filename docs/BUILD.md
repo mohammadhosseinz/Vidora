@@ -14,7 +14,7 @@ flutter run -d windows
 ./scripts/package_windows.ps1 -Iscc C:/path/to/ISCC.exe
 ```
 
-Output: `dist/Vidora-Setup-Windows-x64-0.1.10.exe` and `dist/Vidora-Windows-x64-0.1.10.zip`. The Windows build kit includes the engines; a fresh Git clone does not. Do not download unofficial replacement engines based on links supplied by end users.
+Output: `dist/Vidora-Setup-Windows-x64-0.2.0.exe` and `dist/Vidora-Windows-x64-0.2.0.zip`. The Windows build kit includes the engines; a fresh Git clone does not. Do not download unofficial replacement engines based on links supplied by end users.
 
 The portable Windows build kit can be taken to another computer. Follow [the Persian Windows guide](../WINDOWS-BUILD.fa.md) and run `build_windows.cmd`. The script checks engine hashes, runs analysis/tests, finds the MSVC redistributable DLLs in Visual Studio and creates the installer with Inno Setup.
 
@@ -26,12 +26,12 @@ flutter pub get
 bash scripts/package_unix.sh macos
 ```
 
-Use `--arch x64` with Intel binaries for Intel Macs. Output: `dist/Vidora-macOS-arm64-0.1.10.dmg` for Apple Silicon. When only Apple Command Line Tools are available, `build_macos_cli.py` builds the current Swift plugins and a programmatic window runner. With full Xcode, the normal Flutter build is used. The script defaults to ad-hoc signing; public distribution needs Developer ID signing, notarization and native testing. The runner disables sandboxing to execute the packaged local engines.
+Use `--arch x64` with Intel binaries for Intel Macs. Output: `dist/Vidora-macOS-arm64-0.2.0.dmg` for Apple Silicon. When only Apple Command Line Tools are available, `build_macos_cli.py` builds the current Swift plugins and a programmatic window runner. With full Xcode, the normal Flutter build is used. The script defaults to ad-hoc signing; public distribution needs Developer ID signing, notarization and native testing. The runner disables sandboxing to execute the packaged local engines.
 
 ```sh
 CODESIGN_IDENTITY='Developer ID Application: YOUR NAME (TEAMID)' bash scripts/package_unix.sh macos
-xcrun notarytool submit dist/Vidora-macOS-arm64-0.1.10.dmg --keychain-profile YOUR_PROFILE --wait
-xcrun stapler staple dist/Vidora-macOS-arm64-0.1.10.dmg
+xcrun notarytool submit dist/Vidora-macOS-arm64-0.2.0.dmg --keychain-profile YOUR_PROFILE --wait
+xcrun stapler staple dist/Vidora-macOS-arm64-0.2.0.dmg
 ```
 
 ## Linux (build on Debian/Ubuntu)
@@ -40,7 +40,7 @@ xcrun stapler staple dist/Vidora-macOS-arm64-0.1.10.dmg
 python3 scripts/prepare_runtime.py --platform linux --arch x64 --ffmpeg-dir /path/to/static-ffmpeg/bin --ffmpeg-notices /path/to/notices
 flutter pub get
 bash scripts/package_unix.sh linux
-sudo apt install ./dist/Vidora-Linux-amd64-0.1.10.deb
+sudo apt install ./dist/Vidora-Linux-amd64-0.2.0.deb
 ```
 
 Use `--arch arm64` with ARM64 binaries when appropriate. The packaged x64 build requires glibc 2.35 or newer. Outputs: DEB and portable tar.gz under `dist/`. The x64 package targets Ubuntu 22.04 or newer and Debian 12 or newer. The Debian package declares GTK/system dependencies; yt-dlp includes its Python runtime; the media engines are bundled.
