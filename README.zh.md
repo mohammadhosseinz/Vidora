@@ -18,7 +18,7 @@
 
 ## 安装
 
-版本 **0.1.10**。本地安装包保存在 `dist/`：
+版本 **0.2.0**。本地安装包保存在 `dist/`：
 
 - **Apple Silicon Mac：** 打开 DMG，将 Vidora 拖入 Applications。
 - **Linux x64：** 在 Ubuntu 或 Debian 上安装 DEB，或解压便携版本。

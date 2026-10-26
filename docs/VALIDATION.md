@@ -1,5 +1,18 @@
 # Validation
 
+## 0.2.0 — 2026-10-25
+
+- Reviewed and incorporated the three commits on `origin/feat/persist-language` (`307b530`, `311bcf4`, `4c46bda`) into local branch `codex/site-aware-downloads`. Remote `main` remained at `d879c06`; no open GitHub pull requests were found. Added the absent language regression coverage, refreshed the dependency lockfile and macOS plugin registration, and protected startup against unreadable or wrongly typed preferences.
+- Flutter 3.41.2 / Dart 3.11: `flutter analyze --no-pub lib test` reported no issues; formatting and `git diff --check` passed. The full suite before adding the separate Range integration test passed 49 tests, with the public-network smoke test skipped. The additional real Range resume test passed, bringing distinct application coverage to 50 tests. Preference checks were repeated after the final theme/close changes.
+- Real local tests used the bundled macOS yt-dlp 2026.08.19, FFmpeg/FFprobe and Deno, plus a generated two-second H.264/AAC fixture. Homebrew FFmpeg encoded VP9/Opus test inputs; the app still used bundled tools for inspection, thumbnails, silent downloads, DASH merging, WebM output and FFprobe stream validation.
+- The Range test served a generated MP4 with padding from a throttled local HTTP server, paused after progress, checked a nonempty retained `.part`, resumed the same job, observed a positive HTTP Range offset, verified video/audio streams and checked successful partial-folder cleanup.
+- Offline process fixtures exercised connection fallback without losing parts, recovery in a new engine instance, pause/resume, capability-gated impersonation, disabled impersonation, opt-in format fallback, and immediate DRM stop. Queue tests covered independent batch failures, stable IDs, restart recovery, duplicate/malformed entries, previous-snapshot recovery, serialized saves and exclusion of cookie/header contents. Diagnostics tests checked redaction before persistence and bounded output. Widget tests covered all four UI languages and language/theme persistence.
+- Four Aparat extractor Python tests passed using the developer Python yt-dlp 2026.07.04. Public source sites were not retested in this session; these checks do not establish live download success for every profiled site.
+- Built the macOS arm64 release with the standalone Command Line Tools runner. Updated its plugin discovery for `shared_darwin_source` and excluded test sources. Pinned the Foundation path provider to a compatible Swift backend and avoided the unused Android JNI backend.
+- Created `dist/Vidora-macOS-arm64-0.2.0.dmg`, verified strict/deep ad-hoc signing, and launched the packaged app. The native close smoke test passed with a 1080×773 content area. The visible dark interface was inspected through native accessibility and a screenshot. Full native GUI downloading was not exercised; engine and widget tests covered download flows.
+- Engine update handling warns after 90 days and offers an explicit latest-release check; automatic executable replacement is intentionally not implemented. Cookies/session headers are re-selected after restart. HTTP/server restrictions can still prevent resumption.
+- Windows/Linux packages were not rebuilt in this session. The local Graphify update command could not run because its configured Python interpreter no longer exists; this checkout had no graph to update. Native packages and test logs remain in ignored `dist/` and `work/` directories. This section records local validation before the GitHub upload.
+
 ## 0.1.10 — Linux x64 packages, 2026-10-06
 
 - Kept the application version at `0.1.10+11`. Built the Linux x64 DEB and portable archive with the Aparat extractor included.

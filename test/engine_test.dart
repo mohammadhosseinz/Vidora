@@ -38,7 +38,11 @@ void main() {
       engine.connection = const ConnectionOptions(mode: ConnectionMode.direct);
       try {
         final video = await engine.inspect('$origin/watch');
-        expect(video.thumbnailBytes, image);
+        expect(
+          video.thumbnailBytes,
+          image,
+          reason: engine.diagnostics.text('inspection'),
+        );
         expect(video.qualities, isNotEmpty);
       } finally {
         await engine.shutdown();
@@ -205,9 +209,9 @@ void main() {
     expect(classify('Unable to connect to proxy'), Failure.proxy);
     expect(
       classify('The web client only works when logged-in'),
-      Failure.restricted,
+      Failure.loginRequired,
     );
-    expect(classify('HTTP Error 401: Unauthorized'), Failure.restricted);
+    expect(classify('HTTP Error 401: Unauthorized'), Failure.loginRequired);
     expect(
       classify('This video is protected by a password'),
       Failure.restricted,
